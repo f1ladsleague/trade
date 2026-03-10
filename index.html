@@ -342,7 +342,8 @@
                 <!-- New Post Form -->
                 <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 h-fit">
                     <h4 class="f1-font text-sm font-bold text-blue-400 mb-4 uppercase tracking-wider">Submit a Question</h4>
-                    <form id="new-post-form" class="space-y-4">
+                    <!-- Fixed: Prevent native submit and hook into window.handleNewPost robustly -->
+                    <form id="new-post-form" class="space-y-4" onsubmit="event.preventDefault(); if(window.handleNewPost) { window.handleNewPost(event); } else { alert('Connecting to the database, please wait a second and try again...'); }">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Name</label>
                             <input type="text" id="post-name" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600" placeholder="Your name...">
@@ -400,8 +401,23 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration mapped from environment
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // =========================================================================
+        // 🛠️ DATABASE CONFIGURATION FOR EXTERNAL DEPLOYMENT (WASMER.IO)
+        // =========================================================================
+        const MY_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyA-UFNHQedUKKHeV_UiVy_LERJCoHzGFWk",
+            authDomain: "f1-lads-league-trade-8afae.firebaseapp.com",
+            projectId: "f1-lads-league-trade-8afae",
+            storageBucket: "f1-lads-league-trade-8afae.firebasestorage.app",
+            messagingSenderId: "577290460040",
+            appId: "1:577290460040:web:5d899ebe07220a6f6db83d",
+            measurementId: "G-LRLTJFN5YH"
+        };
+
+        // Use Canvas injected config if available, otherwise use your custom config for Wasmer
+        const envConfig = typeof __firebase_config !== 'undefined' && __firebase_config;
+        const firebaseConfig = envConfig ? JSON.parse(__firebase_config) : MY_FIREBASE_CONFIG;
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -514,7 +530,7 @@
                         </button>
 
                         <!-- Reply Form (Hidden by default) -->
-                        <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-3 bg-slate-800 rounded border border-slate-600" onsubmit="window.handleNewReply(event, '${post.id}')">
+                        <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-3 bg-slate-800 rounded border border-slate-600" onsubmit="event.preventDefault(); if(window.handleNewReply) { window.handleNewReply(event, '${post.id}'); } else { alert('Connecting to the database, please wait a second and try again...'); }">
                             <div class="flex gap-3">
                                 <input type="text" id="reply-name-${post.id}" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none" placeholder="Name">
                                 <select id="reply-constructor-${post.id}" onchange="window.toggleReplyPassword('${post.id}')" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none">
@@ -548,8 +564,12 @@
 
         // Exposed functions on window for inline event handlers
         window.handleNewPost = async function(e) {
-            e.preventDefault();
-            if (!currentUser) return;
+            if (e) e.preventDefault();
+            
+            if (!currentUser) {
+                alert("Still connecting to the database. Please try again in a few seconds.");
+                return;
+            }
 
             const nameInput = document.getElementById('post-name');
             const constInput = document.getElementById('post-constructor');
@@ -623,8 +643,12 @@
         };
 
         window.handleNewReply = async function(e, postId) {
-            e.preventDefault();
-            if (!currentUser) return;
+            if (e) e.preventDefault();
+            
+            if (!currentUser) {
+                alert("Still connecting to the database. Please try again in a few seconds.");
+                return;
+            }
 
             const post = posts.find(p => p.id === postId.toString());
             if (!post) return;
@@ -685,9 +709,6 @@
                 console.error("Error deleting reply:", error);
             }
         };
-
-        // Attach listener for main post form
-        document.getElementById('new-post-form').addEventListener('submit', window.handleNewPost);
 
     </script>
 </body>
