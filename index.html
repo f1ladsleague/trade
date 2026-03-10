@@ -541,7 +541,7 @@
                             <div class="flex gap-3">
                                 <input type="text" id="reply-name-${post.id}" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none" placeholder="Name">
                                 <select id="reply-constructor-${post.id}" onchange="window.toggleReplyPassword('${post.id}')" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none">
-                                    <option value="" disabled selected>Affiliation...</option>
+                                    <option value="" disabled selected>Team</option>
                                     <option value="Red Bull Racing">Red Bull Racing</option>
                                     <option value="McLaren">McLaren</option>
                                     <option value="Mercedes">Mercedes</option>
@@ -689,7 +689,7 @@
 
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()), updatedPost);
-                window.toggleReplyForm(postId);
+                // Intentionally NOT toggling the form back to visible after submission updates the DOM
             } catch (error) {
                 console.error("Error creating reply:", error);
                 alert("Failed to submit reply.");
