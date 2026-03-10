@@ -322,8 +322,26 @@
             </div>
         </div>
 
+        <!-- Footer -->
+        <footer class="mt-16 pt-10 border-t border-slate-800">
+            <div class="bg-red-950/10 border border-red-900/30 p-8 rounded-2xl">
+                <h4 class="f1-font text-sm text-ferrari mb-6 flex items-center gap-3 uppercase tracking-widest font-bold">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    Important
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-[11px] text-slate-400 leading-relaxed">
+                    <p>
+                        <strong class="text-slate-200 uppercase tracking-tighter">Driver Veto Fees:</strong> Driver Veto fees must be paid <u>solely</u> from the respective Driver's personal funds. Constructors are strictly prohibited from subsidising or paying these fees.
+                    </p>
+                    <p>
+                        <strong class="text-slate-200 uppercase tracking-tighter">Market Manipulation:</strong> Constructors are STRICTLY PROHIBITED from coordinating between each other to manipulate the nomination order. This is the ONLY restriction on Constructors; they are otherwise free to openly negotiate, discuss, and plan with other Drivers and Constructors.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
         <!-- PADDOCK DISCUSSION FORUM -->
-        <section id="paddock-forum" class="mt-16 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+        <section id="paddock-forum" class="mt-16 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl mb-12">
             <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="f1-font text-xl font-bold text-white tracking-tight flex items-center gap-2">
                     <span>💬</span> Paddock Discussion Board
@@ -334,13 +352,13 @@
             <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Posts List -->
                 <div class="lg:col-span-2 flex flex-col">
-                    <div id="forum-posts" class="flex-1 space-y-4 max-h-[600px] overflow-y-auto pr-2 forum-scroll">
+                    <div id="forum-posts" class="flex-1 space-y-6 max-h-[600px] overflow-y-auto pr-2 forum-scroll">
                         <!-- Posts will be injected here via JS -->
                     </div>
                 </div>
 
                 <!-- New Post Form -->
-                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 h-fit">
+                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 h-fit sticky top-6">
                     <h4 class="f1-font text-sm font-bold text-blue-400 mb-4 uppercase tracking-wider">Submit a Question</h4>
                     <!-- Fixed: Prevent native submit and hook into window.handleNewPost robustly -->
                     <form id="new-post-form" class="space-y-4" onsubmit="event.preventDefault(); if(window.handleNewPost) { window.handleNewPost(event); } else { alert('Connecting to the database, please wait a second and try again...'); }">
@@ -365,8 +383,12 @@
                             <input type="password" id="post-password" class="w-full bg-slate-900 border border-red-900/50 rounded p-2 text-sm text-white focus:border-red-500 focus:outline-none placeholder-slate-600" placeholder="Required for Committee...">
                         </div>
                         <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Subject</label>
+                            <input type="text" id="post-subject" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600" placeholder="Brief subject line...">
+                        </div>
+                        <div>
                             <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Message</label>
-                            <textarea id="post-message" required rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600 resize-none" placeholder="Ask a question about the regulations..."></textarea>
+                            <textarea id="post-message" required rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600 resize-none" placeholder="Ask a question about the regulations..."></textarea>
                         </div>
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition-colors text-sm f1-font uppercase tracking-wider">
                             Post Message
@@ -375,24 +397,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Footer -->
-        <footer class="mt-16 pt-10 border-t border-slate-800">
-            <div class="bg-red-950/10 border border-red-900/30 p-8 rounded-2xl">
-                <h4 class="f1-font text-sm text-ferrari mb-6 flex items-center gap-3 uppercase tracking-widest font-bold">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                    Important
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-[11px] text-slate-400 leading-relaxed">
-                    <p>
-                        <strong class="text-slate-200 uppercase tracking-tighter">Driver Veto Fees:</strong> Driver Veto fees must be paid <u>solely</u> from the respective Driver's personal funds. Constructors are strictly prohibited from subsidising or paying these fees.
-                    </p>
-                    <p>
-                        <strong class="text-slate-200 uppercase tracking-tighter">Market Manipulation:</strong> Constructors are STRICTLY PROHIBITED from coordinating between each other to manipulate the nomination order. This is the ONLY restriction on Constructors; they are otherwise free to openly negotiate, discuss, and plan with other Drivers and Constructors.
-                    </p>
-                </div>
-            </div>
-        </footer>
     </div>
 
     <!-- Forum Logic using Firebase -->
@@ -490,19 +494,21 @@
             posts.forEach(post => {
                 const style = constructorStyles[post.constructor] || { text: "text-slate-400", border: "border-slate-500", bg: "bg-slate-900" };
                 const isPostMine = currentUser && post.userId === currentUser.uid;
+                const subjectHtml = post.subject ? `<h4 class="text-lg font-bold text-white mt-1 mb-2">${post.subject}</h4>` : '';
                 
                 let repliesHtml = '';
                 if (post.replies && post.replies.length > 0) {
-                    repliesHtml = `<div class="mt-4 space-y-3 pl-4 border-l-2 border-slate-700">`;
+                    // Reddit-style thread indentation
+                    repliesHtml = `<div class="mt-4 ml-2 pl-4 border-l-2 border-slate-700 space-y-5">`;
                     post.replies.forEach(reply => {
                         const rStyle = constructorStyles[reply.constructor] || { text: "text-slate-400", border: "border-slate-500", bg: "bg-slate-900" };
                         const isReplyMine = currentUser && reply.userId === currentUser.uid;
                         const deleteReplyBtn = isReplyMine ? `<button type="button" onclick="window.deleteReply('${post.id}', '${reply.id}')" class="text-red-500 hover:text-red-400 ml-2" title="Delete Reply"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : '';
                         
                         repliesHtml += `
-                            <div class="bg-slate-800/80 rounded p-3 text-sm border border-slate-700">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="font-bold text-white">${reply.author}</span>
+                            <div class="text-sm">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-bold text-slate-200">${reply.author}</span>
                                     <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${rStyle.text} ${rStyle.border} ${rStyle.bg}">${reply.constructor}</span>
                                     <span class="text-xs text-slate-500 ml-auto flex items-center">${reply.timestamp}${deleteReplyBtn}</span>
                                 </div>
@@ -516,12 +522,13 @@
                 const deletePostBtn = isPostMine ? `<button type="button" onclick="window.deletePost('${post.id}')" class="text-red-500 hover:text-red-400 ml-2" title="Delete Post"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : '';
 
                 const postHtml = `
-                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-700 shadow-sm">
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                    <div class="bg-slate-900 rounded-xl p-5 border border-slate-700 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                             <span class="font-bold text-white">${post.author}</span>
                             <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${style.text} ${style.border} ${style.bg} w-fit">${post.constructor}</span>
                             <span class="text-xs text-slate-500 sm:ml-auto flex items-center">${post.timestamp}${deletePostBtn}</span>
                         </div>
+                        ${subjectHtml}
                         <p class="text-slate-300 text-sm leading-relaxed mb-4">${post.text}</p>
                         
                         <button type="button" onclick="window.toggleReplyForm('${post.id}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
@@ -530,7 +537,7 @@
                         </button>
 
                         <!-- Reply Form (Hidden by default) -->
-                        <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-3 bg-slate-800 rounded border border-slate-600" onsubmit="event.preventDefault(); if(window.handleNewReply) { window.handleNewReply(event, '${post.id}'); } else { alert('Connecting to the database, please wait a second and try again...'); }">
+                        <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-4 bg-slate-800 rounded border border-slate-600" onsubmit="event.preventDefault(); if(window.handleNewReply) { window.handleNewReply(event, '${post.id}'); } else { alert('Connecting to the database, please wait a second and try again...'); }">
                             <div class="flex gap-3">
                                 <input type="text" id="reply-name-${post.id}" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none" placeholder="Name">
                                 <select id="reply-constructor-${post.id}" onchange="window.toggleReplyPassword('${post.id}')" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none">
@@ -573,6 +580,7 @@
 
             const nameInput = document.getElementById('post-name');
             const constInput = document.getElementById('post-constructor');
+            const subjInput = document.getElementById('post-subject');
             const msgInput = document.getElementById('post-message');
             const pwdInput = document.getElementById('post-password');
 
@@ -587,6 +595,7 @@
             const newPost = {
                 author: nameInput.value,
                 constructor: constInput.value,
+                subject: subjInput.value,
                 text: msgInput.value,
                 timestamp: dateStr,
                 createdAt: Date.now(),
@@ -600,6 +609,7 @@
                 // Reset form
                 nameInput.value = '';
                 constInput.value = '';
+                subjInput.value = '';
                 msgInput.value = '';
                 pwdInput.value = '';
                 window.toggleMainPassword();
