@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Lads League Season 6 - Trade Window Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mercedes: #00D7B6;
+            --redbull: #4781D7;
+            --ferrari: #ED1131;
+            --mclaren: #F47600;
+            --astonmartin: #229971;
+            --committee: #FF0000;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0e14;
+            color: #e2e8f0;
+        }
+        .f1-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* Team Font Colors */
+        .text-mercedes { color: var(--mercedes); }
+        .text-redbull { color: var(--redbull); }
+        .text-ferrari { color: var(--ferrari); }
+        .text-mclaren { color: var(--mclaren); }
+        .text-aston { color: var(--astonmartin); }
+        .text-committee { color: var(--committee); }
+
+        .border-mercedes { border-color: var(--mercedes); }
+        .border-redbull { border-color: var(--redbull); }
+        .border-ferrari { border-color: var(--ferrari); }
+        .border-mclaren { border-color: var(--mclaren); }
+        .border-aston { border-color: var(--astonmartin); }
+        .border-committee { border-color: var(--committee); }
+
+        .bg-committee-light { background-color: rgba(255, 0, 0, 0.1); }
+
+        .step-container {
+            position: relative;
+            padding-left: 4rem;
+            margin-bottom: 5rem;
+        }
+        .step-container::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: -5rem;
+            width: 2px;
+            background: linear-gradient(to bottom, #ff1801, #3b82f6, transparent);
+        }
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2rem;
+            height: 2rem;
+            background: #ff1801;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 20;
+            box-shadow: 0 0 20px rgba(255, 24, 1, 0.4);
+        }
+        .example-box {
+            background: rgba(30, 41, 59, 0.4);
+            border-left: 4px solid #3b82f6;
+            padding: 1.25rem;
+            margin-top: 1.25rem;
+            border-radius: 0 0.75rem 0.75rem 0;
+        }
+        .bg-dark-card { background: rgba(15, 23, 42, 0.8); }
+        
+        /* Custom Scrollbar for forum */
+        .forum-scroll::-webkit-scrollbar { width: 6px; }
+        .forum-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
+        .forum-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+        .forum-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-12 border-b border-slate-800 pb-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div>
+                    <h2 class="f1-font text-xs tracking-widest uppercase text-red-600 mb-2">Technical Directive 032026.1</h2>
+                    <h1 class="f1-font text-4xl md:text-5xl font-bold tracking-tighter uppercase text-white">Trade Window Regulations</h1>
+                    <p class="text-slate-400 mt-2 font-light italic text-lg">F1 Lads League - Season 6</p>
+                </div>
+                <div class="text-right flex flex-col items-end gap-2">
+                    <span class="bg-red-600/10 text-red-500 text-[10px] f1-font px-4 py-1.5 rounded-full border border-red-600/20 uppercase tracking-widest">Confidential</span>
+                </div>
+            </div>
+            
+            <!-- Detailed Financial Dashboard -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-12">
+                <!-- Red Bull Racing -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <p class="text-[10px] text-redbull uppercase font-bold mb-3 f1-font">Red Bull Racing</p>
+                    <div class="text-[11px] space-y-2 mb-4">
+                        <div class="flex justify-between"><span>Eranga</span><span class="font-mono text-slate-300">$50</span></div>
+                        <div class="flex justify-between"><span>Nippa</span><span class="font-mono text-slate-300">$25</span></div>
+                    </div>
+                    <div class="border-t border-slate-800 pt-3">
+                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$75</span></div>
+                        <div class="flex justify-between mt-1"><span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-redbull text-sm font-bold">$425</span></div>
+                    </div>
+                </div>
+                <!-- McLaren -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <p class="text-[10px] text-mclaren uppercase font-bold mb-3 f1-font">McLaren</p>
+                    <div class="text-[11px] space-y-2 mb-4">
+                        <div class="flex justify-between"><span>Sahan</span><span class="font-mono text-slate-300">$200</span></div>
+                        <div class="flex justify-between"><span>Sameera</span><span class="font-mono text-slate-300">$125</span></div>
+                    </div>
+                    <div class="border-t border-slate-800 pt-3">
+                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$325</span></div>
+                        <div class="flex justify-between mt-1"><span class="text-[10px] text-mclaren text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-mclaren text-sm font-bold">$175</span></div>
+                    </div>
+                </div>
+                <!-- Mercedes -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <p class="text-[10px] text-mercedes uppercase font-bold mb-3 f1-font">Mercedes</p>
+                    <div class="text-[11px] space-y-2 mb-4">
+                        <div class="flex justify-between"><span>Rodda</span><span class="font-mono text-slate-300">$200</span></div>
+                        <div class="flex justify-between"><span>Kalpa</span><span class="font-mono text-slate-300">$128</span></div>
+                    </div>
+                    <div class="border-t border-slate-800 pt-3">
+                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$328</span></div>
+                        <div class="flex justify-between mt-1"><span class="text-[10px] text-mercedes text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-mercedes text-sm font-bold">$172</span></div>
+                    </div>
+                </div>
+                <!-- Aston Martin -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <p class="text-[10px] text-aston uppercase font-bold mb-3 f1-font">Aston Martin</p>
+                    <div class="text-[11px] space-y-2 mb-4">
+                        <div class="flex justify-between"><span>Nuwie G</span><span class="font-mono text-slate-300">$310</span></div>
+                        <div class="flex justify-between"><span>Shahan</span><span class="font-mono text-slate-300">$150</span></div>
+                    </div>
+                    <div class="border-t border-slate-800 pt-3">
+                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$460</span></div>
+                        <div class="flex justify-between mt-1"><span class="text-[10px] text-aston text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-aston text-sm font-bold">$40</span></div>
+                    </div>
+                </div>
+                <!-- Ferrari -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-red-900/40">
+                    <p class="text-[10px] text-ferrari uppercase font-bold mb-3 f1-font">Ferrari</p>
+                    <div class="text-[11px] space-y-2 mb-4">
+                        <div class="flex justify-between"><span>Mapa</span><span class="font-mono text-slate-300">$475</span></div>
+                        <div class="flex justify-between"><span>Shiyan</span><span class="font-mono text-slate-300">$25</span></div>
+                    </div>
+                    <div class="border-t border-slate-800 pt-3">
+                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$500</span></div>
+                        <div class="flex justify-between mt-1"><span class="text-[10px] text-ferrari text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-ferrari text-sm font-bold">$0</span></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- STEP 1 -->
+        <div class="step-container">
+            <div class="step-number">1</div>
+            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">The Silent Nomination</h3>
+            <div class="mt-4 space-y-4 text-slate-300">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <p>Constructors submit <strong>exactly one</strong> private nomination for a <strong>Driver that has not yet been traded</strong>.</p>
+                        <p class="text-xs text-slate-400">Nominations must include the cash bid amount the Buying Constructor is offering. There is <u>no minimum or maximum</u> amount required for a valid bid, subject only to the Buying Constructor's remaining Budget Cap.</p>
+                        <ul class="text-[11px] space-y-2 text-slate-400 list-disc pl-4 leading-relaxed">
+                            <li>The Driver who is nominated the most (most popular) is auctioned first. This process is repeated each round.</li>
+                            <li>If there are multiple Drivers who receive the same number of nominations, the Driver that will be processed first will be determined as follows:
+                                <ul class="list-[circle] pl-5 mt-1 space-y-1">
+                                    <li><strong>Tie-Breaker 1:</strong> Highest championship points (i.e., the Driver with the higher number of championship points will be processed first).</li>
+                                    <li><strong>Tie-Breaker 2:</strong> Highest Tier status (e.g., a Tier 1 Driver will be processed before a Tier 1.5 Driver).</li>
+                                    <li><strong>Tie-Breaker 3:</strong> If the number of championship points and Tier status are the same, it will be determined by chance (i.e., the Drivers' names will be pulled out of a hat).</li>
+                                </ul>
+                            </li>
+                            <li><strong>Ineligibility:</strong> Constructors that fail to submit a nomination in this round are precluded from all subsequent bidding for the current Driver cycle.</li>
+                        </ul>
+                    </div>
+                    <div class="example-box">
+                        <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p>
+                        <p class="text-sm italic">
+                            <strong>Mapa</strong> (Ferrari) receives 2 nominations (Red Bull Racing, Mercedes).<br>
+                            <strong>Sahan</strong> (McLaren) receives 1 nomination (Aston Martin).<br>
+                            <strong>McLaren</strong> submits no nomination.<br><br>
+                            <em>Outcome:</em> Mapa is the primary Target Driver and is processed first.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-container">
+            <div class="step-number">2</div>
+            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Final Bidding</h3>
+            <div class="mt-4 space-y-4 text-slate-300">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <p>Constructors who did not nominate the active Target Driver in Step 1 may now place a single, final bid.</p>
+                        <p class="text-xs text-slate-400 italic mt-4">Only Constructors who submitted a nomination in Step 1 (for any Driver) are eligible to bid now. Original nominations remain locked and cannot be modified.</p>
+                    </div>
+                    <div class="example-box">
+                        <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p>
+                        <p class="text-sm italic">
+                            Because <strong>Aston Martin</strong> participated in Step 1 (nominating Sahan), they are eligible to bid for Mapa now.<br><br>
+                            <strong>McLaren</strong> is ineligible to bid for Mapa because they failed to participate in the nomination round.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-container">
+            <div class="step-number">3</div>
+            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Trade Settlement</h3>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Defensive/Voluntary -->
+                <div class="bg-dark-card p-6 rounded-xl border border-slate-700">
+                    <h4 class="f1-font text-xs font-bold uppercase mb-4 text-emerald-400 tracking-wider">Bid &le; Selling Constructor's ROFR Amount</h4>
+                    <p class="text-xs text-slate-400 mb-4">The Selling Constructor has two procedural options:</p>
+                    <div class="space-y-3">
+                        <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-slate-800">
+                            <span class="text-emerald-400 font-bold uppercase block mb-1 underline decoration-emerald-900 underline-offset-4">Option A: Match & Defend</span>
+                            The Selling Constructor pays the highest bid amount to the League and retains the Driver via Right of First Refusal (ROFR).
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-slate-800">
+                            <span class="text-blue-400 font-bold uppercase block mb-1 underline decoration-blue-900 underline-offset-4">Option B: Voluntary Sale</span>
+                            The Selling Constructor accepts the trade. The Selling Constructor is <strong>REQUIRED</strong> to sell to the Buying Constructor that has made the highest bid (i.e., they have no discretion as to who they can sell to). If they are not happy with the incoming Driver from the highest bidding Buying Constructor, their only alternative is to exercise their ROFR to block the trade. The incoming replacement Driver is determined strictly by their championship standing. The Driver being acquired will always be swapped for the Driver on the Buying Constructor's roster who holds the matching relative ranking within their team (i.e., the team's points leader is traded for the other team's points leader).
+                            <div class="mt-3 text-[10px] text-slate-300 space-y-2 bg-slate-800 p-3 rounded border border-slate-700">
+                                <p><strong class="text-blue-300">Example:</strong> If Red Bull Racing's bid for Mapa is accepted by Ferrari, then it would be the Driver who is leading on points at Red Bull Racing that will be traded for Mapa (assuming Mapa is leading on points at Ferrari).</p>
+                                <p class="text-slate-400 italic pt-1 border-t border-slate-700 font-bold">Tie-Breaker: If both roster Drivers are on identical points, the Selling Constructor chooses the incoming Driver.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Forced -->
+                <div class="bg-dark-card p-6 rounded-xl border border-red-900/50">
+                    <h4 class="f1-font text-xs font-bold uppercase mb-4 text-ferrari tracking-wider">Bid > Selling Constructor's ROFR Amount</h4>
+                    <p class="text-xs text-slate-400 mb-4">The Selling Constructor is priced out and <strong>MUST</strong> facilitate a trade.</p>
+                    <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-red-900/20">
+                        <span class="text-ferrari font-bold uppercase block mb-1 underline decoration-red-900 underline-offset-4">Selling Constructor's Discretion:</span>
+                        If multiple bidders exceed the ROFR amount, the Selling Constructor now has the discretion to decide which Constructor they wish to trade with and will not be required to sell to the highest bid. <strong>Crucially, the Selling Constructor can ONLY sell to the Buying Constructors who have bid above the ROFR Amount.</strong>
+                        <div class="mt-2 space-y-2">
+                            <p class="text-slate-400 italic">Rationale: Since the Selling Constructor no longer has the ability to block the trade, they retain discretion to ensure they are happy with the incoming Driver that will be traded (i.e., it is not fair that they should be required to accept a random Driver they do not want).</p>
+                            <p class="text-red-400 font-bold">Note: If the incoming Driver has not yet been processed, the Selling Constructor may be at risk of losing such Driver in a subsequent trade.</p>
+                        </div>
+                        <div class="mt-3 text-[10px] text-slate-300 bg-slate-800 p-3 rounded border border-slate-700">
+                            <p><strong class="text-red-300">Example:</strong> If Mercedes bid below the ROFR Amount for Mapa, and Red Bull Racing and Aston Martin bid above the ROFR Amount for Mapa, Ferrari would only be allowed to sell Mapa to either Red Bull Racing or Aston Martin, as Mercedes' bid was below Ferrari's ROFR Amount.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step-container mb-0 pb-10">
+            <div class="step-number">4</div>
+            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Driver Veto</h3>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-6 bg-emerald-900/10 border border-emerald-900/40 rounded-xl relative">
+                    <div class="absolute top-3 right-3 text-emerald-500 font-bold text-[10px] f1-font uppercase tracking-widest">Outcome A</div>
+                    <h4 class="f1-font text-xs text-emerald-400 mb-2 font-bold uppercase">DRIVER ACCEPTS</h4>
+                    <p class="text-[11px] text-slate-300 leading-relaxed italic">The Driver is traded to the Buying Constructor. Budget Caps are updated. The Driver is now <strong>LOCKED</strong> and cannot be traded again.</p>
+                </div>
+                <div class="p-6 bg-red-900/10 border border-red-900/40 rounded-xl relative">
+                    <div class="absolute top-3 right-3 text-red-500 font-bold text-[10px] f1-font uppercase tracking-widest">Outcome B</div>
+                    <h4 class="f1-font text-xs text-red-400 mb-2 font-bold uppercase">DRIVER VETOES</h4>
+                    <p class="text-[11px] text-slate-300 leading-relaxed italic mb-4">The Driver pays the Tier-specific Veto Fee from personal funds. Trade is cancelled. The Driver is now <strong>LOCKED</strong> and cannot be traded again.</p>
+                    
+                    <!-- Redesigned Veto Fees Display -->
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
+                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 1</span>
+                            <span class="text-sm text-red-400 font-bold mt-1">$100</span>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
+                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 1.5</span>
+                            <span class="text-sm text-red-400 font-bold mt-1">$90</span>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
+                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 2</span>
+                            <span class="text-sm text-red-400 font-bold mt-1">$70</span>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
+                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 3</span>
+                            <span class="text-sm text-red-400 font-bold mt-1">$30</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESET BLOCK -->
+            <div class="mt-12 p-8 bg-blue-950/10 border-2 border-dashed border-blue-900/40 rounded-2xl text-center shadow-inner">
+                <div class="flex items-center justify-center gap-4 mb-4">
+                    <div class="w-10 h-10 flex items-center justify-center bg-blue-600 rounded-full shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </div>
+                    <span class="f1-font text-xl font-bold text-white tracking-widest uppercase">Process Repeated</span>
+                </div>
+                <p class="text-sm text-slate-300 max-w-2xl mx-auto italic font-semibold leading-relaxed">
+                    The entire process is repeated until all Drivers have been processed - that is, the process returns to <strong class="text-blue-400 uppercase">Step 1</strong> for the next Driver determined by a fresh nomination round (i.e. all previous nominations are discarded). Locked Drivers (i.e. Drivers who have already been processed) cannot be nominated again. Once all Drivers have been processed, the Mid Season Driver Trade is officially over.
+                </p>
+                <div class="example-box mt-6 text-left border-blue-500 bg-slate-900/60 p-6">
+                    <p class="text-[11px] uppercase font-bold text-blue-400 mb-2 underline decoration-blue-900 underline-offset-4">Example</p>
+                    <p class="text-sm italic text-slate-300">
+                        Mapa is now <strong>Locked</strong>. <strong>Ferrari</strong> has gained <strong>$150</strong> (from sale) and the incoming replacement Driver. <br><br>
+                        In the next nomination round, <strong>Ferrari</strong> can use their new $150 to either bid aggressively for other Drivers or serve as a defensive shield to protect their remaining roster.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PADDOCK DISCUSSION FORUM -->
+        <section id="paddock-forum" class="mt-16 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="f1-font text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <span>💬</span> Paddock Discussion Board
+                </h3>
+                <span class="text-xs text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700">Public Q&A</span>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Posts List -->
+                <div class="lg:col-span-2 flex flex-col">
+                    <div id="forum-posts" class="flex-1 space-y-4 max-h-[600px] overflow-y-auto pr-2 forum-scroll">
+                        <!-- Posts will be injected here via JS -->
+                    </div>
+                </div>
+
+                <!-- New Post Form -->
+                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 h-fit">
+                    <h4 class="f1-font text-sm font-bold text-blue-400 mb-4 uppercase tracking-wider">Submit a Question</h4>
+                    <form id="new-post-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Name</label>
+                            <input type="text" id="post-name" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600" placeholder="Your name...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Affiliation</label>
+                            <select id="post-constructor" onchange="window.toggleMainPassword()" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none">
+                                <option value="" disabled selected>Select Constructor...</option>
+                                <option value="Red Bull Racing">Red Bull Racing</option>
+                                <option value="McLaren">McLaren</option>
+                                <option value="Mercedes">Mercedes</option>
+                                <option value="Aston Martin">Aston Martin</option>
+                                <option value="Ferrari">Ferrari</option>
+                                <option value="F1 Lads League Committee">F1 Lads League Committee</option>
+                            </select>
+                        </div>
+                        <div id="post-password-container" class="hidden">
+                            <label class="block text-xs font-bold text-red-400 mb-1 uppercase">Committee Password</label>
+                            <input type="password" id="post-password" class="w-full bg-slate-900 border border-red-900/50 rounded p-2 text-sm text-white focus:border-red-500 focus:outline-none placeholder-slate-600" placeholder="Required for Committee...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Message</label>
+                            <textarea id="post-message" required rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600 resize-none" placeholder="Ask a question about the regulations..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition-colors text-sm f1-font uppercase tracking-wider">
+                            Post Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-10 border-t border-slate-800">
+            <div class="bg-red-950/10 border border-red-900/30 p-8 rounded-2xl">
+                <h4 class="f1-font text-sm text-ferrari mb-6 flex items-center gap-3 uppercase tracking-widest font-bold">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    Important
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-[11px] text-slate-400 leading-relaxed">
+                    <p>
+                        <strong class="text-slate-200 uppercase tracking-tighter">Driver Veto Fees:</strong> Driver Veto fees must be paid <u>solely</u> from the respective Driver's personal funds. Constructors are strictly prohibited from subsidising or paying these fees.
+                    </p>
+                    <p>
+                        <strong class="text-slate-200 uppercase tracking-tighter">Market Manipulation:</strong> Constructors are STRICTLY PROHIBITED from coordinating between each other to manipulate the nomination order. This is the ONLY restriction on Constructors; they are otherwise free to openly negotiate, discuss, and plan with other Drivers and Constructors.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Forum Logic using Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration mapped from environment
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const collectionName = 'forum_posts';
+
+        let posts = [];
+        let currentUser = null;
+
+        // Constructor styles map
+        const constructorStyles = {
+            "Red Bull Racing": { text: "text-redbull", border: "border-redbull", bg: "bg-slate-900" },
+            "McLaren": { text: "text-mclaren", border: "border-mclaren", bg: "bg-slate-900" },
+            "Mercedes": { text: "text-mercedes", border: "border-mercedes", bg: "bg-slate-900" },
+            "Aston Martin": { text: "text-aston", border: "border-aston", bg: "bg-slate-900" },
+            "Ferrari": { text: "text-ferrari", border: "border-ferrari", bg: "bg-slate-900" },
+            "F1 Lads League Committee": { text: "text-committee", border: "border-committee", bg: "bg-committee-light" }
+        };
+
+        const forumContainer = document.getElementById('forum-posts');
+
+        // Initial Authentication Flow
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication Error:", error);
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                setupRealtimeListener();
+            }
+        });
+
+        // Sync forum posts from Firestore
+        function setupRealtimeListener() {
+            if (!currentUser) return;
+            const postsRef = collection(db, 'artifacts', appId, 'public', 'data', collectionName);
+            
+            onSnapshot(postsRef, (snapshot) => {
+                posts = [];
+                snapshot.forEach(document => {
+                    posts.push({ id: document.id, ...document.data() });
+                });
+                
+                // Sort by creation time manually
+                posts.sort((a, b) => a.createdAt - b.createdAt);
+                renderPosts();
+            }, (error) => {
+                console.error("Firestore Listen Error:", error);
+            });
+        }
+
+        function renderPosts() {
+            forumContainer.innerHTML = '';
+            
+            if (posts.length === 0) {
+                forumContainer.innerHTML = '<p class="text-slate-500 text-sm italic">No discussions yet. Be the first to ask a question.</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const style = constructorStyles[post.constructor] || { text: "text-slate-400", border: "border-slate-500", bg: "bg-slate-900" };
+                const isPostMine = currentUser && post.userId === currentUser.uid;
+                
+                let repliesHtml = '';
+                if (post.replies && post.replies.length > 0) {
+                    repliesHtml = `<div class="mt-4 space-y-3 pl-4 border-l-2 border-slate-700">`;
+                    post.replies.forEach(reply => {
+                        const rStyle = constructorStyles[reply.constructor] || { text: "text-slate-400", border: "border-slate-500", bg: "bg-slate-900" };
+                        const isReplyMine = currentUser && reply.userId === currentUser.uid;
+                        const deleteReplyBtn = isReplyMine ? `<button type="button" onclick="window.deleteReply('${post.id}', '${reply.id}')" class="text-red-500 hover:text-red-400 ml-2" title="Delete Reply"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : '';
+                        
+                        repliesHtml += `
+                            <div class="bg-slate-800/80 rounded p-3 text-sm border border-slate-700">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-bold text-white">${reply.author}</span>
+                                    <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${rStyle.text} ${rStyle.border} ${rStyle.bg}">${reply.constructor}</span>
+                                    <span class="text-xs text-slate-500 ml-auto flex items-center">${reply.timestamp}${deleteReplyBtn}</span>
+                                </div>
+                                <p class="text-slate-300 leading-relaxed">${reply.text}</p>
+                            </div>
+                        `;
+                    });
+                    repliesHtml += `</div>`;
+                }
+
+                const deletePostBtn = isPostMine ? `<button type="button" onclick="window.deletePost('${post.id}')" class="text-red-500 hover:text-red-400 ml-2" title="Delete Post"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : '';
+
+                const postHtml = `
+                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-700 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                            <span class="font-bold text-white">${post.author}</span>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${style.text} ${style.border} ${style.bg} w-fit">${post.constructor}</span>
+                            <span class="text-xs text-slate-500 sm:ml-auto flex items-center">${post.timestamp}${deletePostBtn}</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-4">${post.text}</p>
+                        
+                        <button type="button" onclick="window.toggleReplyForm('${post.id}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                            Reply
+                        </button>
+
+                        <!-- Reply Form (Hidden by default) -->
+                        <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-3 bg-slate-800 rounded border border-slate-600" onsubmit="window.handleNewReply(event, '${post.id}')">
+                            <div class="flex gap-3">
+                                <input type="text" id="reply-name-${post.id}" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none" placeholder="Name">
+                                <select id="reply-constructor-${post.id}" onchange="window.toggleReplyPassword('${post.id}')" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+                                    <option value="" disabled selected>Affiliation...</option>
+                                    <option value="Red Bull Racing">Red Bull Racing</option>
+                                    <option value="McLaren">McLaren</option>
+                                    <option value="Mercedes">Mercedes</option>
+                                    <option value="Aston Martin">Aston Martin</option>
+                                    <option value="Ferrari">Ferrari</option>
+                                    <option value="F1 Lads League Committee">F1 Lads League Committee</option>
+                                </select>
+                            </div>
+                            <div id="reply-password-container-${post.id}" class="hidden">
+                                <input type="password" id="reply-password-${post.id}" class="w-full bg-slate-900 border border-red-900/50 rounded p-2 text-xs text-white focus:border-red-500 focus:outline-none" placeholder="Committee Password...">
+                            </div>
+                            <textarea id="reply-message-${post.id}" required rows="2" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none resize-none" placeholder="Write a reply..."></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="window.toggleReplyForm('${post.id}')" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1">Cancel</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1 px-4 rounded transition-colors">Submit</button>
+                            </div>
+                        </form>
+
+                        ${repliesHtml}
+                    </div>
+                `;
+                forumContainer.insertAdjacentHTML('beforeend', postHtml);
+            });
+            
+            forumContainer.scrollTop = forumContainer.scrollHeight;
+        }
+
+        // Exposed functions on window for inline event handlers
+        window.handleNewPost = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const nameInput = document.getElementById('post-name');
+            const constInput = document.getElementById('post-constructor');
+            const msgInput = document.getElementById('post-message');
+            const pwdInput = document.getElementById('post-password');
+
+            if (constInput.value === "F1 Lads League Committee" && pwdInput.value !== "F1LADS2026") {
+                alert("Incorrect Committee password.");
+                return;
+            }
+
+            const newPostId = Date.now().toString();
+            const dateStr = new Date().toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
+
+            const newPost = {
+                author: nameInput.value,
+                constructor: constInput.value,
+                text: msgInput.value,
+                timestamp: dateStr,
+                createdAt: Date.now(),
+                replies: [],
+                userId: currentUser.uid
+            };
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, newPostId), newPost);
+                
+                // Reset form
+                nameInput.value = '';
+                constInput.value = '';
+                msgInput.value = '';
+                pwdInput.value = '';
+                window.toggleMainPassword();
+            } catch (error) {
+                console.error("Error creating post:", error);
+                alert("Failed to submit question.");
+            }
+        };
+
+        window.toggleMainPassword = function() {
+            const constInput = document.getElementById('post-constructor');
+            const pwdContainer = document.getElementById('post-password-container');
+            const pwdInput = document.getElementById('post-password');
+            if (constInput.value === "F1 Lads League Committee") {
+                pwdContainer.classList.remove('hidden');
+                pwdInput.required = true;
+            } else {
+                pwdContainer.classList.add('hidden');
+                pwdInput.required = false;
+                pwdInput.value = ''; // clear on toggle away
+            }
+        };
+
+        window.toggleReplyPassword = function(postId) {
+            const constInput = document.getElementById(`reply-constructor-${postId}`);
+            const pwdContainer = document.getElementById(`reply-password-container-${postId}`);
+            const pwdInput = document.getElementById(`reply-password-${postId}`);
+            if (constInput.value === "F1 Lads League Committee") {
+                pwdContainer.classList.remove('hidden');
+                pwdInput.required = true;
+            } else {
+                pwdContainer.classList.add('hidden');
+                pwdInput.required = false;
+                pwdInput.value = ''; // clear on toggle away
+            }
+        };
+
+        window.toggleReplyForm = function(postId) {
+            const form = document.getElementById(`reply-form-${postId}`);
+            if (form) form.classList.toggle('hidden');
+        };
+
+        window.handleNewReply = async function(e, postId) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const post = posts.find(p => p.id === postId.toString());
+            if (!post) return;
+
+            const nameInput = document.getElementById(`reply-name-${postId}`);
+            const constInput = document.getElementById(`reply-constructor-${postId}`);
+            const msgInput = document.getElementById(`reply-message-${postId}`);
+            const pwdInput = document.getElementById(`reply-password-${postId}`);
+
+            if (constInput.value === "F1 Lads League Committee" && pwdInput.value !== "F1LADS2026") {
+                alert("Incorrect Committee password.");
+                return;
+            }
+
+            const dateStr = new Date().toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
+
+            const newReply = {
+                id: Date.now().toString(),
+                author: nameInput.value,
+                constructor: constInput.value,
+                text: msgInput.value,
+                timestamp: dateStr,
+                userId: currentUser.uid
+            };
+
+            const updatedPost = { ...post };
+            updatedPost.replies.push(newReply);
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()), updatedPost);
+                window.toggleReplyForm(postId);
+            } catch (error) {
+                console.error("Error creating reply:", error);
+                alert("Failed to submit reply.");
+            }
+        };
+
+        window.deletePost = async function(postId) {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()));
+            } catch(error) {
+                console.error("Error deleting post:", error);
+            }
+        };
+
+        window.deleteReply = async function(postId, replyId) {
+            if (!currentUser) return;
+            const post = posts.find(p => p.id === postId.toString());
+            if (!post) return;
+
+            const updatedPost = { ...post };
+            updatedPost.replies = updatedPost.replies.filter(r => r.id !== replyId.toString());
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()), updatedPost);
+            } catch (error) {
+                console.error("Error deleting reply:", error);
+            }
+        };
+
+        // Attach listener for main post form
+        document.getElementById('new-post-form').addEventListener('submit', window.handleNewPost);
+
+    </script>
+</body>
+</html>
