@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ye Olde Wordle</title>
+    <style>
+        :root {
+            --bg-color: #121213;
+            --text-color: #ffffff;
+            --empty-border: #3a3a3c;
+            --filled-border: #565758;
+            --correct: #538d4e;
+            --present: #b59f3b;
+            --absent: #3a3a3c;
+            --key-bg: #818384;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            border-bottom: 1px solid var(--empty-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            height: calc(100vh - 50px);
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #board-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        #board {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            grid-gap: 5px;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 5/6;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 5px;
+        }
+
+        .tile {
+            border: 2px solid var(--empty-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .tile.active {
+            border-color: var(--filled-border);
+        }
+
+        .tile.correct {
+            background-color: var(--correct);
+            border-color: var(--correct);
+        }
+
+        .tile.present {
+            background-color: var(--present);
+            border-color: var(--present);
+        }
+
+        .tile.absent {
+            background-color: var(--absent);
+            border-color: var(--absent);
+        }
+
+        #keyboard-container {
+            height: 200px;
+            width: 100%;
+            padding-bottom: 10px;
+        }
+
+        .key-row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 8px;
+            touch-action: manipulation;
+        }
+
+        .key {
+            font-family: inherit;
+            font-weight: bold;
+            border: 0;
+            padding: 0;
+            margin: 0 3px;
+            height: 58px;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--key-bg);
+            color: var(--text-color);
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-transform: uppercase;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .key.large {
+            flex: 1.5;
+            font-size: 14px;
+        }
+
+        .key.correct { background-color: var(--correct); }
+        .key.present { background-color: var(--present); }
+        .key.absent { background-color: var(--absent); }
+
+        #message {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>YE OLDE WORDLE</h1>
+    </header>
+
+    <div id="message"></div>
+
+    <div id="game-container">
+        <div id="board-container">
+            <div id="board"></div>
+        </div>
+        <div id="keyboard-container"></div>
+    </div>
+
+    <script>
+        // Combine modern and archaic words here
+        const dictionary = [
+            "APPLE", "CRANE", "TRAIN", "HOUSE", "SMART", "WATER", "EARTH", "PLANT", 
+            "THINE", "QUOTH", "KNAVE", "SHALT", "SMITE", "FORTH", "HENCE", "ALACK", 
+            "DOTH", "SOOTH", "WHERE", "WHICH", "WORLD", "YOUTH", "GHOST", "SWORD"
+        ];
+        
+        // The word to guess
+        let targetWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+
+        let currentRow = 0;
+        let currentTile = 0;
+        let currentGuess = [];
+        let gameOver = false;
+
+        const board = document.getElementById('board');
+        const keyboard = document.getElementById('keyboard-container');
+        const messageBox = document.getElementById('message');
+
+        const keys = [
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+            ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
+        ];
+
+        // Initialize Board
+        function initBoard() {
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                row.id = `row-${i}`;
+                for (let j = 0; j < 5; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.id = `tile-${i}-${j}`;
+                    row.appendChild(tile);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        // Initialize Keyboard
+        function initKeyboard() {
+            keys.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'key-row';
+                row.forEach(key => {
+                    const button = document.createElement('button');
+                    button.textContent = key;
+                    button.className = 'key';
+                    button.id = `key-${key}`;
+                    if (key === 'ENTER' || key === '⌫') {
+                        button.classList.add('large');
+                    }
+                    button.addEventListener('click', () => handleInput(key));
+                    rowDiv.appendChild(button);
+                });
+                keyboard.appendChild(rowDiv);
+            });
+        }
+
+        function showMessage(msg, duration = 2000) {
+            messageBox.textContent = msg;
+            messageBox.style.opacity = 1;
+            if (duration > 0) {
+                setTimeout(() => { messageBox.style.opacity = 0; }, duration);
+            }
+        }
+
+        function updateTile() {
+            const row = document.getElementById(`row-${currentRow}`);
+            for (let i = 0; i < 5; i++) {
+                const tile = row.children[i];
+                tile.textContent = currentGuess[i] || '';
+                if (currentGuess[i]) {
+                    tile.classList.add('active');
+                } else {
+                    tile.classList.remove('active');
+                }
+            }
+        }
+
+        function handleInput(key) {
+            if (gameOver) return;
+
+            if (key === '⌫' || key === 'Backspace') {
+                if (currentTile > 0) {
+                    currentGuess.pop();
+                    currentTile--;
+                    updateTile();
+                }
+            } else if (key === 'ENTER' || key === 'Enter') {
+                checkGuess();
+            } else if (/^[A-Z]$/.test(key) && currentTile < 5) {
+                currentGuess.push(key);
+                currentTile++;
+                updateTile();
+            }
+        }
+
+        function updateKeyboard(letter, status) {
+            const keyElement = document.getElementById(`key-${letter}`);
+            if (!keyElement) return;
+            
+            // Priority: correct > present > absent
+            if (keyElement.classList.contains('correct')) return;
+            if (keyElement.classList.contains('present') && status === 'absent') return;
+            
+            keyElement.className = `key ${status}`;
+            if (letter === 'ENTER' || letter === '⌫') keyElement.classList.add('large');
+        }
+
+        function checkGuess() {
+            const guessString = currentGuess.join('');
+            
+            if (guessString.length !== 5) {
+                showMessage("Not enough letters");
+                return;
+            }
+            
+            if (!dictionary.includes(guessString)) {
+                showMessage("Not in word list");
+                return;
+            }
+
+            const row = document.getElementById(`row-${currentRow}`);
+            let targetCharCounts = {};
+            
+            for (let i = 0; i < 5; i++) {
+                targetCharCounts[targetWord[i]] = (targetCharCounts[targetWord[i]] || 0) + 1;
+            }
+
+            const tileStatuses = new Array(5).fill('absent');
+
+            // Pass 1: Find 'correct' letters
+            for (let i = 0; i < 5; i++) {
+                if (guessString[i] === targetWord[i]) {
+                    tileStatuses[i] = 'correct';
+                    targetCharCounts[guessString[i]] -= 1;
+                }
+            }
+
+            // Pass 2: Find 'present' letters
+            for (let i = 0; i < 5; i++) {
+                if (tileStatuses[i] !== 'correct' && targetCharCounts[guessString[i]] > 0) {
+                    tileStatuses[i] = 'present';
+                    targetCharCounts[guessString[i]] -= 1;
+                }
+            }
+
+            // Apply statuses visually
+            for (let i = 0; i < 5; i++) {
+                const tile = row.children[i];
+                setTimeout(() => {
+                    tile.classList.add(tileStatuses[i]);
+                    tile.style.border = 'none';
+                    updateKeyboard(guessString[i], tileStatuses[i]);
+                }, i * 200); // Staggered reveal animation effect
+            }
+
+            setTimeout(() => {
+                if (guessString === targetWord) {
+                    showMessage("Splendid!", 0); // Stays on screen
+                    gameOver = true;
+                    return;
+                }
+
+                currentRow++;
+                currentTile = 0;
+                currentGuess = [];
+
+                if (currentRow === 6) {
+                    showMessage(targetWord, 0); // Stays on screen
+                    gameOver = true;
+                }
+            }, 1000);
+        }
+
+        // Support physical keyboard input for testing
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            handleInput(key);
+        });
+
+        initBoard();
+        initKeyboard();
+
+    </script>
+</body>
+</html>
