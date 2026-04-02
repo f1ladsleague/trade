@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ye Olde Wordle</title>
+    <title>Wordle</title>
     <style>
         :root {
             --bg-color: #121213;
@@ -25,7 +25,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100dvh; /* Changed to dvh for mobile UI bars */
+            height: 100dvh;
             overflow: hidden;
         }
 
@@ -36,10 +36,11 @@
             justify-content: center;
             align-items: center;
             height: 50px;
+            position: relative;
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 32px;
             margin: 0;
             letter-spacing: 2px;
             font-weight: 700;
@@ -51,7 +52,7 @@
             justify-content: space-between;
             width: 100%;
             max-width: 500px;
-            height: calc(100dvh - 50px); /* Changed to dvh */
+            height: calc(100dvh - 50px);
             padding: 10px;
             box-sizing: border-box;
         }
@@ -62,6 +63,7 @@
             align-items: center;
             flex-grow: 1;
             overflow: hidden;
+            position: relative;
         }
 
         #board {
@@ -101,7 +103,6 @@
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Added Wordle flip animation */
         @keyframes flipIn {
             0% { transform: rotateX(0); }
             50% { transform: rotateX(-90deg); }
@@ -112,28 +113,14 @@
             animation: flipIn 0.5s ease forwards;
         }
 
-        .tile.correct {
-            background-color: var(--correct);
-            border-color: var(--correct);
-            color: white;
-        }
-
-        .tile.present {
-            background-color: var(--present);
-            border-color: var(--present);
-            color: white;
-        }
-
-        .tile.absent {
-            background-color: var(--absent);
-            border-color: var(--absent);
-            color: white;
-        }
+        .tile.correct { background-color: var(--correct); border-color: var(--correct); color: white; }
+        .tile.present { background-color: var(--present); border-color: var(--present); color: white; }
+        .tile.absent { background-color: var(--absent); border-color: var(--absent); color: white; }
 
         #keyboard-container {
             height: 200px;
             width: 100%;
-            padding-bottom: env(safe-area-inset-bottom, 10px); /* Lifts keyboard above nav bar */
+            padding-bottom: env(safe-area-inset-bottom, 10px);
         }
 
         .key-row {
@@ -165,11 +152,7 @@
             transition: background-color 0.3s ease;
         }
 
-        .key.large {
-            flex: 1.5;
-            font-size: 14px;
-        }
-
+        .key.large { flex: 1.5; font-size: 14px; }
         .key.correct { background-color: var(--correct); }
         .key.present { background-color: var(--present); }
         .key.absent { background-color: var(--absent); }
@@ -188,16 +171,36 @@
             transition: opacity 0.3s ease;
             pointer-events: none;
             z-index: 10;
+            text-align: center;
+        }
+
+        #play-again {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--correct);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>YE OLDE WORDLE</h1>
+        <h1>WORDLE</h1>
     </header>
 
     <div id="message"></div>
+    <button id="play-again" onclick="resetGame()">PLAY AGAIN</button>
 
     <div id="game-container">
         <div id="board-container">
@@ -207,31 +210,87 @@
     </div>
 
     <script>
-        // Expanded dictionary to include CREAM and other standard words for testing
-        const dictionary = [
-            "CREAM", "APPLE", "CRANE", "TRAIN", "HOUSE", "SMART", "WATER", "EARTH", "PLANT", 
-            "THINE", "QUOTH", "KNAVE", "SHALT", "SMITE", "FORTH", "HENCE", "ALACK", "AUDIO",
-            "DOTH", "SOOTH", "WHERE", "WHICH", "WORLD", "YOUTH", "GHOST", "SWORD", "BOARD",
-            "DREAM", "STARE", "SHARE", "ARISE", "RAISE", "ROAST", "COAST", "TOAST", "GUEST"
-        ];
-        
-        let targetWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+        let validGuesses = []; 
+        let validAnswers = ["TRAIN", "HOUSE", "SMART", "WATER", "EARTH", "PLANT", "CREAM", "AUDIO"]; // Fallback if internet fails
+        let targetWord = "";
 
         let currentRow = 0;
         let currentTile = 0;
         let currentGuess = [];
         let gameOver = false;
         let isAnimating = false;
+        let isReady = false; 
 
         const board = document.getElementById('board');
         const keyboard = document.getElementById('keyboard-container');
         const messageBox = document.getElementById('message');
+        const playAgainBtn = document.getElementById('play-again');
 
         const keys = [
             ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
             ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
             ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
         ];
+
+        // Fetch real Wordle dictionaries
+        async function loadDictionary() {
+            showMessage("Loading dictionary...", 0); 
+            try {
+                // Fetch the exact 2,300+ Wordle Answers
+                const answersRes = await fetch('https://raw.githubusercontent.com/cfreshman/wordle-answers/main/wordle-answers-alphabetical.txt');
+                const answersText = await answersRes.text();
+                validAnswers = answersText.split('\n').map(word => word.trim().toUpperCase()).filter(word => word.length === 5);
+                
+                // Fetch the 10,000+ Allowed Guesses
+                const guessesRes = await fetch('https://raw.githubusercontent.com/cfreshman/wordle-allowed-guesses/main/wordle-allowed-guesses.txt');
+                const guessesText = await guessesRes.text();
+                validGuesses = guessesText.split('\n').map(word => word.trim().toUpperCase()).filter(word => word.length === 5);
+                
+                // Combine them so answers are always accepted as guesses
+                validGuesses = [...new Set([...validGuesses, ...validAnswers])];
+
+                startGame();
+            } catch (error) {
+                // Fallback to local small array if fetch fails
+                validGuesses = [...validAnswers]; 
+                startGame();
+            }
+        }
+
+        function startGame() {
+            targetWord = validAnswers[Math.floor(Math.random() * validAnswers.length)];
+            messageBox.style.opacity = 0; 
+            isReady = true; 
+        }
+
+        function resetGame() {
+            currentRow = 0;
+            currentTile = 0;
+            currentGuess = [];
+            gameOver = false;
+            playAgainBtn.style.display = 'none';
+            messageBox.style.opacity = 0;
+            
+            // Pick a new word
+            targetWord = validAnswers[Math.floor(Math.random() * validAnswers.length)];
+
+            // Clear visual board
+            const tiles = document.querySelectorAll('.tile');
+            tiles.forEach(tile => {
+                tile.textContent = '';
+                tile.className = 'tile';
+                tile.style.border = '';
+            });
+
+            // Clear visual keyboard
+            const keysElements = document.querySelectorAll('.key');
+            keysElements.forEach(key => {
+                key.className = 'key';
+                if (key.textContent === 'ENTER' || key.textContent === '⌫') {
+                    key.classList.add('large');
+                }
+            });
+        }
 
         function initBoard() {
             for (let i = 0; i < 6; i++) {
@@ -289,7 +348,7 @@
         }
 
         function handleInput(key) {
-            if (gameOver || isAnimating) return;
+            if (gameOver || isAnimating || !isReady) return;
 
             if (key === '⌫' || key === 'Backspace') {
                 if (currentTile > 0) {
@@ -325,7 +384,7 @@
                 return;
             }
             
-            if (!dictionary.includes(guessString)) {
+            if (!validGuesses.includes(guessString)) {
                 showMessage("Not in word list");
                 return;
             }
@@ -340,7 +399,7 @@
 
             const tileStatuses = new Array(5).fill('absent');
 
-            // Pass 1: Find 'correct' letters
+            // Pass 1: correct
             for (let i = 0; i < 5; i++) {
                 if (guessString[i] === targetWord[i]) {
                     tileStatuses[i] = 'correct';
@@ -348,7 +407,7 @@
                 }
             }
 
-            // Pass 2: Find 'present' letters
+            // Pass 2: present
             for (let i = 0; i < 5; i++) {
                 if (tileStatuses[i] !== 'correct' && targetCharCounts[guessString[i]] > 0) {
                     tileStatuses[i] = 'present';
@@ -356,27 +415,27 @@
                 }
             }
 
-            // Apply statuses with flip animation
+            // Animate
             for (let i = 0; i < 5; i++) {
                 const tile = row.children[i];
                 setTimeout(() => {
                     tile.classList.add('flip');
                     
-                    // Change color halfway through the flip
                     setTimeout(() => {
                         tile.classList.add(tileStatuses[i]);
                         tile.style.border = 'none';
                         updateKeyboard(guessString[i], tileStatuses[i]);
                     }, 250); 
-                }, i * 300); // Staggered reveal
+                }, i * 300); 
             }
 
-            // Wait for all animations to finish before allowing next input
+            // Check End Game
             setTimeout(() => {
                 isAnimating = false;
                 if (guessString === targetWord) {
                     showMessage("Splendid!", 0); 
                     gameOver = true;
+                    playAgainBtn.style.display = 'block';
                     return;
                 }
 
@@ -387,6 +446,7 @@
                 if (currentRow === 6) {
                     showMessage(targetWord, 0);
                     gameOver = true;
+                    playAgainBtn.style.display = 'block';
                 }
             }, 5 * 300 + 250);
         }
@@ -398,6 +458,7 @@
 
         initBoard();
         initKeyboard();
+        loadDictionary();
 
     </script>
 </body>
