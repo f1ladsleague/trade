@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Lads League - Trade Window Regulations [Technical Directive 032026.1]
+    <title>F1 Lads League - Trade Window Regulations [Technical Directive 032026.2]
 https://trade.f1lads.com/
 
 Please post all questions/comments at the bottom of the discussion forum for everyone's benefit.</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/f1ladsleague/sidebetting/6f14ca658f9c288fd8ca8a79df5c658c97c8ac92/favicon.png">
     <style>
         :root {
@@ -88,26 +88,46 @@ Please post all questions/comments at the bottom of the discussion forum for eve
         .forum-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
         .forum-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
         .forum-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Highlight Styles for Regulatory Updates */
+        .highlight-update {
+            background-color: rgba(234, 179, 8, 0.15);
+            color: #fde047;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            font-weight: 500;
+        }
+        .badge-update {
+            background-color: #eab308;
+            color: #422006;
+            font-size: 0.55rem;
+            font-weight: 800;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-left: 6px;
+            vertical-align: middle;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="p-6 md:p-12">
     <div class="max-w-6xl mx-auto">
-        <!-- Header -->
         <header class="mb-12 border-b border-slate-800 pb-10">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
-                    <h2 class="f1-font text-xs tracking-widest uppercase text-red-600 mb-2">Technical Directive 032026.1</h2>
+                    <h2 class="f1-font text-xs tracking-widest uppercase text-red-600 mb-2">Technical Directive 032026.2</h2>
                     <h1 class="f1-font text-4xl md:text-5xl font-bold tracking-tighter uppercase text-white">Trade Window Regulations</h1>
                     <p class="text-slate-400 mt-2 font-light italic text-lg">F1 Lads League - Season 5 | 2026</p>
                 </div>
                 <div class="text-right flex flex-col items-end gap-2">
                     <span class="bg-red-600/10 text-red-500 text-[10px] f1-font px-4 py-1.5 rounded-full border border-red-600/20 uppercase tracking-widest">Confidential</span>
+                    <span class="bg-yellow-600/10 text-yellow-500 text-[10px] f1-font px-4 py-1.5 rounded-full border border-yellow-600/30 uppercase tracking-widest">Last Updated: May 2026</span>
                 </div>
             </div>
             
-            <!-- Detailed Financial Dashboard -->
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-12">
-                <!-- Red Bull Racing -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
                     <p class="text-[10px] text-redbull uppercase font-bold mb-3 f1-font">Red Bull Racing</p>
                     <div class="text-[11px] space-y-2 mb-4">
@@ -119,7 +139,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                         <div class="flex justify-between mt-1"><span class="text-[10px] text-redbull text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-redbull text-sm font-bold">$425</span></div>
                     </div>
                 </div>
-                <!-- McLaren -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
                     <p class="text-[10px] text-mclaren uppercase font-bold mb-3 f1-font">McLaren</p>
                     <div class="text-[11px] space-y-2 mb-4">
@@ -131,7 +150,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                         <div class="flex justify-between mt-1"><span class="text-[10px] text-mclaren text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-mclaren text-sm font-bold">$175</span></div>
                     </div>
                 </div>
-                <!-- Mercedes -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
                     <p class="text-[10px] text-mercedes uppercase font-bold mb-3 f1-font">Mercedes</p>
                     <div class="text-[11px] space-y-2 mb-4">
@@ -143,7 +161,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                         <div class="flex justify-between mt-1"><span class="text-[10px] text-mercedes text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-mercedes text-sm font-bold">$172</span></div>
                     </div>
                 </div>
-                <!-- Aston Martin -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
                     <p class="text-[10px] text-aston uppercase font-bold mb-3 f1-font">Aston Martin</p>
                     <div class="text-[11px] space-y-2 mb-4">
@@ -155,7 +172,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                         <div class="flex justify-between mt-1"><span class="text-[10px] text-aston text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-aston text-sm font-bold">$40</span></div>
                     </div>
                 </div>
-                <!-- Ferrari -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-red-900/40">
                     <p class="text-[10px] text-ferrari uppercase font-bold mb-3 f1-font">Ferrari</p>
                     <div class="text-[11px] space-y-2 mb-4">
@@ -170,7 +186,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
         </header>
 
-        <!-- STEP 1 -->
         <div class="step-container">
             <div class="step-number">1</div>
             <h3 class="f1-font text-xl font-bold uppercase tracking-tight">The Silent Nomination</h3>
@@ -178,8 +193,12 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-3">
                         <p>Constructors submit <strong>exactly one</strong> private nomination for a <strong>Driver that has not yet been traded</strong>.</p>
-                        <p class="text-xs text-slate-400">Nominations must include the cash bid amount the Buying Constructor is offering. There is <u>no minimum or maximum</u> amount required for a valid bid, subject only to the Buying Constructor's remaining Budget Cap.</p>
-                        <ul class="text-[11px] space-y-2 text-slate-400 list-disc pl-4 leading-relaxed">
+                        
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            <span class="highlight-update">Nominations must explicitly include <strong>both the cash bid amount AND the Driver from the Buying Constructor's own team being proposed in the swap</strong>. <span class="badge-update">Updated</span></span> There is <u>no minimum or maximum</u> cash amount required for a valid bid, subject only to the Buying Constructor's remaining Budget Cap.
+                        </p>
+                        
+                        <ul class="text-[11px] space-y-2 text-slate-400 list-disc pl-4 leading-relaxed mt-2">
                             <li>The Driver who is nominated the most (most popular) is auctioned first. This process is repeated each round.</li>
                             <li>If there are multiple Drivers who receive the same number of nominations, the Driver that will be processed first will be determined as follows:
                                 <ul class="list-[circle] pl-5 mt-1 space-y-1">
@@ -193,10 +212,9 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                     </div>
                     <div class="example-box">
                         <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p>
-                        <p class="text-sm italic">
-                            <strong>Mapa</strong> (Ferrari) receives 2 nominations (Red Bull Racing, Mercedes).<br>
-                            <strong>Sahan</strong> (McLaren) receives 1 nomination (Aston Martin).<br>
-                            <strong>McLaren</strong> submits no nomination.<br><br>
+                        <p class="text-sm italic leading-relaxed">
+                            <strong>Mapa</strong> (Ferrari) receives 2 nominations: <strong>Red Bull Racing</strong> <span class="highlight-update text-[11px]">(Bid: $176 + Eranga)</span> and <strong>Mercedes</strong> <span class="highlight-update text-[11px]">(Bid: $120 + Kalpa)</span>.<br><br>
+                            <strong>Sahan</strong> (McLaren) receives 1 nomination: <strong>Aston Martin</strong> <span class="highlight-update text-[11px]">(Bid: $50 + Shahan)</span>.<br><br>
                             <em>Outcome:</em> Mapa is the primary Target Driver and is processed first.
                         </p>
                     </div>
@@ -204,7 +222,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
         </div>
 
-        <!-- STEP 2 -->
         <div class="step-container">
             <div class="step-number">2</div>
             <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Final Bidding</h3>
@@ -225,12 +242,10 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
         </div>
 
-        <!-- STEP 3 -->
         <div class="step-container">
             <div class="step-number">3</div>
             <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Trade Settlement</h3>
             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Defensive/Voluntary -->
                 <div class="bg-dark-card p-6 rounded-xl border border-slate-700">
                     <h4 class="f1-font text-xs font-bold uppercase mb-4 text-emerald-400 tracking-wider">Bid &le; Selling Constructor's ROFR Amount</h4>
                     <p class="text-xs text-slate-400 mb-4">The Selling Constructor has two procedural options:</p>
@@ -241,23 +256,31 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                         </div>
                         <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-slate-800">
                             <span class="text-emerald-400 font-bold uppercase block mb-1 underline decoration-emerald-900 underline-offset-4">Option B: Voluntary Sale</span>
-                            The Selling Constructor accepts the trade. The Selling Constructor is <strong>REQUIRED</strong> to sell to the Buying Constructor that has made the highest bid (i.e., they have no discretion as to who they can sell to). If they are not happy with the incoming Driver from the highest bidding Buying Constructor, their only alternative is to exercise their ROFR to block the trade. The incoming replacement Driver is determined strictly by their championship standing. The Driver being acquired will always be swapped for the Driver on the Buying Constructor's roster who holds the matching relative ranking within their team (i.e., the team's points leader is traded for the other team's points leader).
+                            The Selling Constructor accepts the trade. The Selling Constructor is <strong>REQUIRED</strong> to sell to the Buying Constructor that has made the highest bid (i.e., they have no discretion as to who they can sell to). If they are not happy with the incoming Driver from the highest bidding Buying Constructor, their only alternative is to exercise their ROFR to block the trade. 
+                            
+                            <div class="highlight-update mt-3 mb-2 p-2 block leading-relaxed">
+                                The incoming replacement Driver is <strong>strictly the Driver from the Buying Constructor's team that was proposed in the winning bid package</strong>. The default 'matching relative ranking' rule is superseded by whichever of their own Drivers the Buying Constructor attached to their offer. <span class="badge-update">Updated</span>
+                            </div>
+
                             <div class="mt-3 text-[10px] text-slate-300 space-y-2 bg-slate-800 p-3 rounded border border-slate-700">
-                                <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p> If Red Bull Racing's bid for Mapa is accepted by Ferrari, then it would be the Driver who is leading on points at Red Bull Racing that will be traded for Mapa (assuming Mapa is leading on points at Ferrari).</p>
-                                <p class="text-slate-400 italic pt-1 border-t border-slate-700 font-bold">Tie-Breaker: If both roster Drivers are on identical points, the Selling Constructor chooses the incoming Driver.</p>
+                                <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p> If Red Bull Racing's bid for Mapa is accepted by Ferrari, then <span class="text-yellow-300 bg-yellow-500/10 px-1 py-0.5 rounded italic">the specific Driver attached to Red Bull's winning bid package (e.g., Eranga)</span> will be traded for Mapa.
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Forced -->
                 <div class="bg-dark-card p-6 rounded-xl border border-red-900/50">
                     <h4 class="f1-font text-xs font-bold uppercase mb-4 text-ferrari tracking-wider">Bid > Selling Constructor's ROFR Amount</h4>
                     <p class="text-xs text-slate-400 mb-4">The Selling Constructor is priced out and <strong>MUST</strong> facilitate a trade.</p>
                     <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-red-900/20">
                         <span class="text-ferrari font-bold uppercase block mb-1 underline decoration-red-900 underline-offset-4">Selling Constructor's Discretion:</span>
-                        If multiple bidders exceed the ROFR amount, the Selling Constructor now has the discretion to decide which Constructor they wish to trade with and will not be required to sell to the highest bid. <strong>Crucially, the Selling Constructor can ONLY sell to the Buying Constructors who have bid above the ROFR Amount.</strong>
+                        If multiple bidders exceed the ROFR amount, the Selling Constructor has the discretion to decide which Constructor they wish to trade with. <strong>Crucially, the Selling Constructor can ONLY sell to the Buying Constructors who have bid above the ROFR Amount.</strong>
+                        
+                        <div class="highlight-update mt-3 mb-3 p-2 block leading-relaxed">
+                            In making this decision, the Selling Constructor evaluates the <strong>'Total Trade Package' (Cash Bid + the proposed Driver from the Buying Constructor's team)</strong>. They are not required to select the bid with the highest absolute cash value, provided the chosen bid still strictly exceeds their ROFR Amount. <span class="badge-update">Updated</span>
+                        </div>
+
                         <div class="mt-2 space-y-2">
-                            <p class="text-slate-400 italic">Rationale: Since the Selling Constructor no longer has the ability to block the trade, they retain discretion to ensure they are happy with the incoming Driver that will be traded (i.e., it is not fair that they should be required to accept a random Driver they do not want).</p>
+                            <p class="text-slate-400 italic">Rationale: Since the Selling Constructor no longer has the ability to block the trade, they retain discretion to ensure they are happy with the incoming package that will be traded.</p>
                             <p class="text-red-400 font-bold">Note: If the incoming Driver has not yet been processed, the Selling Constructor may be at risk of losing such Driver in a subsequent trade.</p>
                         </div>
                         <div class="mt-3 text-[10px] text-slate-300 bg-slate-800 p-3 rounded border border-slate-700">
@@ -268,7 +291,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
         </div>
 
-        <!-- STEP 4 -->
         <div class="step-container mb-0 pb-10">
             <div class="step-number">4</div>
             <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Driver Veto</h3>
@@ -283,7 +305,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                     <h4 class="f1-font text-xs text-red-400 mb-2 font-bold uppercase">DRIVER VETOES</h4>
                     <p class="text-[11px] text-slate-300 leading-relaxed italic mb-4">The Driver pays the Tier-specific Veto Fee from personal funds. Trade is cancelled. The Driver is now <strong>LOCKED</strong> and cannot be traded again.</p>
                     
-                    <!-- Redesigned Veto Fees Display -->
                     <div class="grid grid-cols-4 gap-2">
                         <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
                             <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 1</span>
@@ -305,7 +326,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                 </div>
             </div>
 
-            <!-- RESET BLOCK -->
             <div class="mt-12 p-8 bg-blue-950/10 border-2 border-dashed border-blue-900/40 rounded-2xl text-center shadow-inner">
                 <div class="flex items-center justify-center gap-4 mb-4">
                     <div class="w-10 h-10 flex items-center justify-center bg-blue-600 rounded-full shadow-lg">
@@ -326,7 +346,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="mt-16 pt-10 border-t border-slate-800">
             <div class="bg-red-950/10 border border-red-900/30 p-8 rounded-2xl">
                 <h4 class="f1-font text-sm text-ferrari mb-6 flex items-center gap-3 uppercase tracking-widest font-bold">
@@ -344,7 +363,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
         </footer>
 
-        <!-- PADDOCK DISCUSSION FORUM -->
         <section id="paddock-forum" class="mt-16 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl mb-12">
             <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="f1-font text-xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -354,17 +372,13 @@ Please post all questions/comments at the bottom of the discussion forum for eve
             </div>
             
             <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Posts List -->
                 <div class="lg:col-span-2 flex flex-col">
                     <div id="forum-posts" class="flex-1 space-y-6 max-h-[600px] overflow-y-auto pr-2 forum-scroll">
-                        <!-- Posts will be injected here via JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- New Post Form -->
                 <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 h-fit sticky top-6">
                     <h4 class="f1-font text-sm font-bold text-blue-400 mb-4 uppercase tracking-wider">Submit a Question</h4>
-                    <!-- Fixed: Prevent native submit and hook into window.handleNewPost robustly -->
                     <form id="new-post-form" class="space-y-4" onsubmit="event.preventDefault(); if(window.handleNewPost) { window.handleNewPost(event); } else { alert('Connecting to the database, please wait a second and try again...'); }">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Name</label>
@@ -403,7 +417,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
         </section>
     </div>
 
-    <!-- Forum Logic using Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -540,7 +553,6 @@ Please post all questions/comments at the bottom of the discussion forum for eve
                             Reply
                         </button>
 
-                        <!-- Reply Form (Hidden by default) -->
                         <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-4 bg-slate-800 rounded border border-slate-600" onsubmit="event.preventDefault(); if(window.handleNewReply) { window.handleNewReply(event, '${post.id}'); } else { alert('Connecting to the database, please wait a second and try again...'); }">
                             <div class="flex gap-3">
                                 <input type="text" id="reply-name-${post.id}" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none" placeholder="Name">
@@ -726,5 +738,4 @@ Please post all questions/comments at the bottom of the discussion forum for eve
 
     </script>
 </body>
-
 </html>
