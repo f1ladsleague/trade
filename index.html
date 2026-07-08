@@ -803,18 +803,15 @@
                 }
             }
             else if(p==='settlement'){
+                // Seller didn't decide in time -> DEFAULT: auto-sell to the HIGHEST bidder.
                 const t=auctionState.target_driver;
-                const bids=allBidsForTarget(t); const rofr=liveCap(auctionState.seller_team);
-                const top=Math.max(...bids.map(b=>b.cash_bid));
-                if(top>rofr){
-                    const best=bids.filter(b=>b.cash_bid>rofr).sort((a,b)=>b.cash_bid-a.cash_bid)[0];
+                const bids=allBidsForTarget(t);
+                if(bids.length===0){
+                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null}).eq('id',auctionState.id);
+                } else {
+                    const best=bids.sort((a,b)=>b.cash_bid-a.cash_bid)[0];
                     const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
                     await supabaseClient.from('auction_state').update({phase:'veto',winning_team:best.constructor,winning_bid:best.cash_bid,winning_swap:best.offered_driver,phase_deadline:deadline}).eq('id',auctionState.id);
-                } else {
-                    await supabaseClient.from('auction_cap_ledger').insert([{round_no:auctionState.round_no,constructor:auctionState.seller_team,delta:-top,reason:'rofr_defend'}]);
-                    await supabaseClient.from('auction_drivers').update({locked:true}).eq('driver',t);
-                    await supabaseClient.from('auction_trades').insert([{round_no:auctionState.round_no,target_driver:t,seller_team:auctionState.seller_team,cash_amount:top,driver_out:t,outcome:'rofr_defended'}]);
-                    await advanceToNextOrEnd(); _advancing=false; return;
                 }
             }
             else if(p==='veto'){
