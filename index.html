@@ -398,9 +398,15 @@
         else capPill.style.display='none';
 
         const region=document.getElementById('content-region');
-        if(role==='Admin')       region.innerHTML = renderAdmin(phase);
-        else if(role==='Driver') region.innerHTML = renderDriver(phase);
-        else                     region.innerHTML = renderConstructor(phase);
+        if(role==='Admin'){
+            region.innerHTML = renderAdmin(phase); // Admin view already includes its own log
+        } else if(role==='Driver'){
+            // Append shared Trade History unless the window is already closed (log shown there anyway)
+            region.innerHTML = renderDriver(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
+        } else {
+            // Constructor: 'complete' already renders the log inline; append for all other phases (incl. idle)
+            region.innerHTML = renderConstructor(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
+        }
     }
 
     function phaseLabel(p){ return {
