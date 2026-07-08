@@ -579,6 +579,11 @@
                    <button class="btn-primary" style="background:#555;" onclick="autoAdvance()">⏭ Force Advance Phase</button>
                    <button class="btn-primary" style="background:#ff4444;margin-top:10px;" onclick="adminCancelRound()">✖ Cancel / Reset This Round</button>`;
         }
+        // FULL RESET — wipes all trade data & restores original roster (for testing)
+        html+=`<div style="margin-top:18px;padding-top:16px;border-top:1px dashed #444;">
+                   <button class="btn-primary" style="background:#8b0000;" onclick="adminFullReset()">🗑️ RESET EVERYTHING (Wipe Database)</button>
+                   <p class="info-line" style="margin-top:8px;">Deletes all nominations, bids, cap changes & trades, unlocks every driver, and restores original teams.</p>
+               </div>`;
         html+='</div>';
         if(phase==='nominate'){
             const tally=tallyNominations();
@@ -722,6 +727,45 @@
             winning_team:null, winning_bid:null, winning_swap:null, phase_deadline:null
         }).eq('id',auctionState.id);
         await refreshAll(); render();
+    };
+
+    // FULL RESET — wipe all trade tables & restore roster to pre-trade state
+    window.adminFullReset = async function(){
+        if(!confirm("⚠️ FULL RESET\n\nThis deletes ALL nominations, bids, cap changes and trades, unlocks every driver, and restores original teams.\n\nContinue?")) return;
+        if(!confirm("Are you absolutely sure? This cannot be undone.")) return;
+
+        const btnErr = (label,e)=>{ console.error(label,e); };
+        try {
+            // 1. Clear the four data tables (delete-all via always-true filter on id)
+            await supabaseClient.from('auction_nominations').delete().gte('id', 0);
+            await supabaseClient.from('auction_bids').delete().gte('id', 0);
+            await supabaseClient.from('auction_cap_ledger').delete().gte('id', 0);
+            await supabaseClient.from('auction_trades').delete().gte('id', 0);
+
+            // 2. Restore every driver: current_team = original_team, unlocked
+            await refreshAll();
+            for(const d of liveDrivers){
+                await supabaseClient.from('auction_drivers')
+                    .update({ current_team: d.original_team, locked: false, updated_at: new Date().toISOString() })
+                    .eq('id', d.id);
+            }
+
+            // 3. Reset the state row to a fresh pre-trade idle (round 1)
+            await supabaseClient.from('auction_state').update({
+                is_active:false, round_no:1, phase:'idle',
+                target_driver:null, seller_team:null,
+                winning_team:null, winning_bid:null, winning_swap:null,
+                phase_deadline:null, updated_at:new Date().toISOString()
+            }).eq('id', auctionState.id);
+
+            await refreshAll();
+            populateLoginDropdowns();
+            render();
+            alert("✅ Database reset. Everything is back to the pre-trade state.");
+        } catch(e){
+            btnErr("Full reset failed:", e);
+            alert("⚠️ Reset hit an error — check the console. Some tables may need RLS delete policies.");
+        }
     };
 
     let _advancing=false;
