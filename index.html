@@ -3,739 +3,790 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Lads League - Trade Window Regulations [Technical Directive 032026.2]
-https://trade.f1lads.com/
-
-Please post all questions/comments at the bottom of the discussion forum for everyone's benefit.</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>F1 Lads League | Mid-Season Trade</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/f1ladsleague/sidebetting/6f14ca658f9c288fd8ca8a79df5c658c97c8ac92/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --mercedes: #00D7B6;
-            --redbull: #4781D7;
-            --ferrari: #ED1131;
-            --mclaren: #F47600;
-            --astonmartin: #229971;
-            --committee: #FF0000;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b0e14;
-            color: #e2e8f0;
-        }
-        .f1-font { font-family: 'Orbitron', sans-serif; }
-        
-        /* Team Font Colors */
-        .text-mercedes { color: var(--mercedes); }
-        .text-redbull { color: var(--redbull); }
-        .text-ferrari { color: var(--ferrari); }
-        .text-mclaren { color: var(--mclaren); }
-        .text-aston { color: var(--astonmartin); }
-        .text-committee { color: var(--committee); }
+        :root { --theme-color: #e10600; --f1-dark: #15151e; --f1-card: #1f1f27; --f1-hover: #2a2a35; }
 
-        .border-mercedes { border-color: var(--mercedes); }
-        .border-redbull { border-color: var(--redbull); }
-        .border-ferrari { border-color: var(--ferrari); }
-        .border-mclaren { border-color: var(--mclaren); }
-        .border-aston { border-color: var(--astonmartin); }
-        .border-committee { border-color: var(--committee); }
+        body { font-family: 'Titillium Web', sans-serif; background-color: var(--f1-dark); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; overflow-y: scroll; }
+        .container { background: var(--f1-card); width: 100%; max-width: 640px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px; position: relative; }
 
-        .bg-committee-light { background-color: rgba(255, 0, 0, 0.1); }
+        a img { border: none; outline: none; }
+        a:hover img { opacity: 0.8; transition: 0.2s; }
+        .league-logo { max-height: 75px; margin: 0 auto 15px auto; display: block; border-radius: 6px; }
 
-        .step-container {
-            position: relative;
-            padding-left: 4rem;
-            margin-bottom: 5rem;
-        }
-        .step-container::before {
-            content: '';
-            position: absolute;
-            left: 1rem;
-            top: 0;
-            bottom: -5rem;
-            width: 2px;
-            background: linear-gradient(to bottom, #ff1801, #3b82f6, transparent);
-        }
-        .step-number {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 2rem;
-            height: 2rem;
-            background: #ff1801;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            font-weight: bold;
-            z-index: 20;
-            box-shadow: 0 0 20px rgba(255, 24, 1, 0.4);
-        }
-        .example-box {
-            background: rgba(30, 41, 59, 0.4);
-            border-left: 4px solid #3b82f6;
-            padding: 1.25rem;
-            margin-top: 1.25rem;
-            border-radius: 0 0.75rem 0.75rem 0;
-        }
-        .bg-dark-card { background: rgba(15, 23, 42, 0.8); }
-        
-        /* Custom Scrollbar for forum */
-        .forum-scroll::-webkit-scrollbar { width: 6px; }
-        .forum-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
-        .forum-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
-        .forum-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+        h1 { text-align: center; text-transform: uppercase; font-weight: 700; margin: 0; }
+        .login-h1-border { border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 5px; transition: border-color 0.3s ease; }
+        .round-info { text-align: center; color: #aaa; font-size: 18px; margin: 10px 0 20px 0; font-weight: 600; }
 
-        /* Highlight Styles for Regulatory Updates */
-        .highlight-update {
-            background-color: rgba(234, 179, 8, 0.15);
-            color: #fde047;
-            padding: 2px 4px;
-            border-radius: 4px;
-            border: 1px solid rgba(234, 179, 8, 0.3);
-            font-weight: 500;
-        }
-        .badge-update {
-            background-color: #eab308;
-            color: #422006;
-            font-size: 0.55rem;
-            font-weight: 800;
-            padding: 2px 4px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            margin-left: 6px;
-            vertical-align: middle;
-            display: inline-block;
-        }
+        .login-toggle { display: flex; margin-bottom: 20px; background: #1a1a21; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .login-toggle button { flex: 1; padding: 12px; border: none; background: transparent; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; font-size: 13px; }
+        .login-toggle button.toggle-active { background: var(--theme-color); color: white; }
+
+        select, input[type="password"], input[type="text"], input[type="number"] { width: 100%; padding: 12px; margin: 10px 0; background: var(--f1-hover); border: 1px solid #444; color: white; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        select:focus, input:focus { outline: none; border-color: var(--theme-color); }
+
+        button.btn-primary { width: 100%; background: var(--theme-color); color: white; border: none; padding: 15px; font-size: 18px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s ease; }
+        button.btn-primary:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        button:disabled { background: #555 !important; cursor: not-allowed; transform: none; color: #aaa; filter: none; }
+
+        .hidden { display: none !important; }
+        .section-box { background: #1a1a21; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+
+        .header-wrapper { position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--theme-color); padding-bottom: 10px; margin-bottom: 20px; }
+        .header-wrapper h1 { font-size: 24px; }
+        .back-arrow { position: absolute; left: 0; color: #aaa; font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; top: 50%; transform: translateY(-50%); }
+        .back-arrow:hover { color: #fff; }
+
+        .phase-banner { text-align: center; background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.35); border-radius: 8px; padding: 12px; margin-bottom: 20px; }
+        .phase-label { font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .phase-name { font-size: 22px; font-weight: 900; color: #ffd700; text-transform: uppercase; margin-top: 4px; }
+        .countdown { font-family: monospace; font-size: 34px; font-weight: 700; color: var(--theme-color); margin-top: 6px; letter-spacing: 2px; }
+        .countdown.urgent { color: #ff4444; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.55; } }
+
+        .cap-pill { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--theme-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; }
+        .cap-pill .lbl { color: var(--theme-color); font-weight: 700; text-transform: uppercase; font-size: 14px; }
+        .cap-pill .val { font-family: monospace; font-size: 22px; font-weight: 900; }
+
+        .driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 480px) { .driver-grid { grid-template-columns: 1fr; } }
+
+        .driver-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--f1-hover); border: 2px solid transparent; border-radius: 10px; cursor: pointer; transition: 0.2s; position: relative; }
+        .driver-card:hover:not(.locked):not(.disabled) { border-color: #666; transform: translateY(-2px); }
+        .driver-card.selected { border-color: var(--theme-color); background: color-mix(in srgb, var(--theme-color) 15%, transparent); }
+        .driver-card.locked { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.9); }
+        .driver-card.disabled { opacity: 0.5; cursor: not-allowed; }
+        .driver-card.mine { border-left: 4px solid #ffd700; }
+
+        .avatar-wrapper { width: 54px; height: 54px; border-radius: 50%; overflow: hidden; border: 2px solid #444; background: #1a1a21; flex-shrink: 0; }
+        .driver-avatar { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: center 15%; }
+        .driver-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .driver-name { font-size: 17px; font-weight: 700; }
+        .driver-team { font-size: 12px; color: #bbb; display: flex; align-items: center; gap: 5px; }
+        .driver-team img { height: 14px; }
+        .tier-badge { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: #000; color: #ffd700; letter-spacing: 0.5px; width: fit-content; }
+        .lock-tag { position: absolute; top: 8px; right: 8px; background: #ff4444; color: #fff; font-size: 9px; font-weight: 900; padding: 3px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .info-line { text-align: center; color: #aaa; font-size: 14px; font-style: italic; margin: 12px 0; }
+        .rules-accordion { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .rules-accordion summary { text-align: center; padding: 12px; font-weight: bold; cursor: pointer; list-style: none; text-transform: uppercase; font-size: 14px; }
+        .rules-accordion summary::-webkit-details-marker { display: none; }
+        .rules-accordion ul { padding: 0 20px 15px 35px; margin: 0; color: #ccc; font-size: 13px; line-height: 1.5; }
+        .rules-accordion li { margin-bottom: 8px; }
+
+        .status-msg { text-align: center; padding: 30px 15px; color: #ccc; font-size: 16px; line-height: 1.5; }
+        .big-icon { font-size: 50px; display: block; margin-bottom: 12px; }
+
+        .bid-row { display: flex; justify-content: space-between; align-items: center; background: #14141b; border: 1px solid #333; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+        .bid-row.above { border-color: #00ff00; }
+        .bid-row.below { border-color: #555; opacity: 0.7; }
+        .bid-info { display: flex; flex-direction: column; gap: 3px; }
+        .bid-team { font-weight: 700; font-size: 16px; }
+        .bid-detail { font-size: 13px; color: #bbb; }
+        .bid-amount { font-family: monospace; font-size: 20px; font-weight: 900; color: #00ff00; }
+        .choose-btn { background: var(--theme-color); color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 13px; }
+        .choose-btn:hover { filter: brightness(1.15); }
+
+        .option-box { border: 1px solid #444; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+        .option-box h3 { margin: 0 0 8px 0; color: var(--theme-color); text-transform: uppercase; font-size: 15px; }
+        .option-box p { margin: 0 0 12px 0; font-size: 13px; color: #bbb; line-height: 1.4; }
+
+        .trade-log-item { background: #14141b; border: 1px solid #333; border-left: 4px solid var(--theme-color); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; font-size: 13px; }
+        .trade-log-item .to { color: #888; font-size: 12px; }
+
+        .admin-warn { background: rgba(255,68,68,0.1); border: 1px solid #ff4444; color: #ff8888; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; text-align: center; }
     </style>
 </head>
-<body class="p-6 md:p-12">
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-12 border-b border-slate-800 pb-10">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div>
-                    <h2 class="f1-font text-xs tracking-widest uppercase text-red-600 mb-2">Technical Directive 032026.2</h2>
-                    <h1 class="f1-font text-4xl md:text-5xl font-bold tracking-tighter uppercase text-white">Trade Window Regulations</h1>
-                    <p class="text-slate-400 mt-2 font-light italic text-lg">F1 Lads League - Season 5 | 2026</p>
-                </div>
-                <div class="text-right flex flex-col items-end gap-2">
-                    <span class="bg-red-600/10 text-red-500 text-[10px] f1-font px-4 py-1.5 rounded-full border border-red-600/20 uppercase tracking-widest">Confidential</span>
-                    <span class="bg-yellow-600/10 text-yellow-500 text-[10px] f1-font px-4 py-1.5 rounded-full border border-yellow-600/30 uppercase tracking-widest">Last Updated: May 2026</span>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-12">
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                    <p class="text-[10px] text-redbull uppercase font-bold mb-3 f1-font">Red Bull Racing</p>
-                    <div class="text-[11px] space-y-2 mb-4">
-                        <div class="flex justify-between"><span>Eranga</span><span class="font-mono text-slate-300">$50</span></div>
-                        <div class="flex justify-between"><span>Nippa</span><span class="font-mono text-slate-300">$25</span></div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$75</span></div>
-                        <div class="flex justify-between mt-1"><span class="text-[10px] text-redbull text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-redbull text-sm font-bold">$425</span></div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                    <p class="text-[10px] text-mclaren uppercase font-bold mb-3 f1-font">McLaren</p>
-                    <div class="text-[11px] space-y-2 mb-4">
-                        <div class="flex justify-between"><span>Sahan</span><span class="font-mono text-slate-300">$200</span></div>
-                        <div class="flex justify-between"><span>Sameera</span><span class="font-mono text-slate-300">$125</span></div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$325</span></div>
-                        <div class="flex justify-between mt-1"><span class="text-[10px] text-mclaren text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-mclaren text-sm font-bold">$175</span></div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                    <p class="text-[10px] text-mercedes uppercase font-bold mb-3 f1-font">Mercedes</p>
-                    <div class="text-[11px] space-y-2 mb-4">
-                        <div class="flex justify-between"><span>Rodda</span><span class="font-mono text-slate-300">$200</span></div>
-                        <div class="flex justify-between"><span>Kalpa</span><span class="font-mono text-slate-300">$128</span></div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$328</span></div>
-                        <div class="flex justify-between mt-1"><span class="text-[10px] text-mercedes text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-mercedes text-sm font-bold">$172</span></div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                    <p class="text-[10px] text-aston uppercase font-bold mb-3 f1-font">Aston Martin</p>
-                    <div class="text-[11px] space-y-2 mb-4">
-                        <div class="flex justify-between"><span>Nuwie G</span><span class="font-mono text-slate-300">$310</span></div>
-                        <div class="flex justify-between"><span>Shahan</span><span class="font-mono text-slate-300">$150</span></div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$460</span></div>
-                        <div class="flex justify-between mt-1"><span class="text-[10px] text-aston text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-aston text-sm font-bold">$40</span></div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-red-900/40">
-                    <p class="text-[10px] text-ferrari uppercase font-bold mb-3 f1-font">Ferrari</p>
-                    <div class="text-[11px] space-y-2 mb-4">
-                        <div class="flex justify-between"><span>Mapa</span><span class="font-mono text-slate-300">$475</span></div>
-                        <div class="flex justify-between"><span>Shiyan</span><span class="font-mono text-slate-300">$25</span></div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="flex justify-between text-[10px] text-slate-500"><span>Cap Used:</span><span>$500</span></div>
-                        <div class="flex justify-between mt-1"><span class="text-[10px] text-ferrari text-sm font-bold uppercase tracking-tighter">Rem. Budget:</span><span class="f1-font text-ferrari text-sm font-bold">$0</span></div>
-                    </div>
-                </div>
-            </div>
-        </header>
+<body>
 
-        <div class="step-container">
-            <div class="step-number">1</div>
-            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">The Silent Nomination</h3>
-            <div class="mt-4 space-y-4 text-slate-300">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-3">
-                        <p>Constructors submit <strong>exactly one</strong> private nomination for a <strong>Driver that has not yet been traded</strong>.</p>
-                        
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            <span class="highlight-update">Nominations must explicitly include <strong>both the cash bid amount AND the Driver from the Buying Constructor's own team being proposed in the swap</strong>. <span class="badge-update">Updated</span></span> There is <u>no minimum or maximum</u> cash amount required for a valid bid, subject only to the Buying Constructor's remaining Budget Cap.
-                        </p>
-                        
-                        <ul class="text-[11px] space-y-2 text-slate-400 list-disc pl-4 leading-relaxed mt-2">
-                            <li>The Driver who is nominated the most (most popular) is auctioned first. This process is repeated each round.</li>
-                            <li>If there are multiple Drivers who receive the same number of nominations, the Driver that will be processed first will be determined as follows:
-                                <ul class="list-[circle] pl-5 mt-1 space-y-1">
-                                    <li><strong>Tie-Breaker 1:</strong> Highest championship points (i.e., the Driver with the higher number of championship points will be processed first).</li>
-                                    <li><strong>Tie-Breaker 2:</strong> Highest Tier status (e.g., a Tier 1 Driver will be processed before a Tier 1.5 Driver).</li>
-                                    <li><strong>Tie-Breaker 3:</strong> If the number of championship points and Tier status are the same, it will be determined by chance (i.e., the Drivers' names will be pulled out of a hat).</li>
-                                </ul>
-                            </li>
-                            <li><strong>Ineligibility:</strong> Constructors that fail to submit a nomination in this round are precluded from all subsequent bidding for the current Driver cycle.</li>
-                        </ul>
-                    </div>
-                    <div class="example-box">
-                        <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p>
-                        <p class="text-sm italic leading-relaxed">
-                            <strong>Mapa</strong> (Ferrari) receives 2 nominations: <strong>Red Bull Racing</strong> <span class="highlight-update text-[11px]">(Bid: $176 + Eranga)</span> and <strong>Mercedes</strong> <span class="highlight-update text-[11px]">(Bid: $120 + Kalpa)</span>.<br><br>
-                            <strong>Sahan</strong> (McLaren) receives 1 nomination: <strong>Aston Martin</strong> <span class="highlight-update text-[11px]">(Bid: $50 + Shahan)</span>.<br><br>
-                            <em>Outcome:</em> Mapa is the primary Target Driver and is processed first.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- ============================ LOGIN ============================ -->
+<div class="container" id="login-section">
+    <a href="https://f1lads.com">
+        <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+    </a>
+    <h1 class="login-h1-border">Mid-Season Trade</h1>
+    <p class="round-info" id="login-status">Loading session…</p>
 
-        <div class="step-container">
-            <div class="step-number">2</div>
-            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Final Bidding</h3>
-            <div class="mt-4 space-y-4 text-slate-300">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-3">
-                        <p>Constructors who did not nominate the active Target Driver in Step 1 may now place a single, final bid.</p>
-                        <p class="text-xs text-slate-400 italic mt-4">Only Constructors who submitted a nomination in Step 1 (for any Driver) are eligible to bid now. Original nominations remain locked and cannot be modified.</p>
-                    </div>
-                    <div class="example-box">
-                        <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p>
-                        <p class="text-sm italic">
-                            Because <strong>Aston Martin</strong> participated in Step 1 (nominating Sahan), they are eligible to bid for Mapa now.<br><br>
-                            <strong>McLaren</strong> is ineligible to bid for Mapa because they failed to participate in the nomination round.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="step-container">
-            <div class="step-number">3</div>
-            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Trade Settlement</h3>
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-dark-card p-6 rounded-xl border border-slate-700">
-                    <h4 class="f1-font text-xs font-bold uppercase mb-4 text-emerald-400 tracking-wider">Bid &le; Selling Constructor's ROFR Amount</h4>
-                    <p class="text-xs text-slate-400 mb-4">The Selling Constructor has two procedural options:</p>
-                    <div class="space-y-3">
-                        <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-slate-800">
-                            <span class="text-emerald-400 font-bold uppercase block mb-1 underline decoration-emerald-900 underline-offset-4">Option A: Match & Defend</span>
-                            The Selling Constructor pays the highest bid amount to the League and retains the Driver via Right of First Refusal (ROFR).
-                        </div>
-                        <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-slate-800">
-                            <span class="text-emerald-400 font-bold uppercase block mb-1 underline decoration-emerald-900 underline-offset-4">Option B: Voluntary Sale</span>
-                            The Selling Constructor accepts the trade. The Selling Constructor is <strong>REQUIRED</strong> to sell to the Buying Constructor that has made the highest bid (i.e., they have no discretion as to who they can sell to). If they are not happy with the incoming Driver from the highest bidding Buying Constructor, their only alternative is to exercise their ROFR to block the trade. 
-                            
-                            <div class="highlight-update mt-3 mb-2 p-2 block leading-relaxed">
-                                The incoming replacement Driver is <strong>strictly the Driver from the Buying Constructor's team that was proposed in the winning bid package</strong>. The default 'matching relative ranking' rule is superseded by whichever of their own Drivers the Buying Constructor attached to their offer. <span class="badge-update">Updated</span>
-                            </div>
-
-                            <div class="mt-3 text-[10px] text-slate-300 space-y-2 bg-slate-800 p-3 rounded border border-slate-700">
-                                <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p> If Red Bull Racing's bid for Mapa is accepted by Ferrari, then <span class="text-yellow-300 bg-yellow-500/10 px-1 py-0.5 rounded italic">the specific Driver attached to Red Bull's winning bid package (e.g., Eranga)</span> will be traded for Mapa.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-dark-card p-6 rounded-xl border border-red-900/50">
-                    <h4 class="f1-font text-xs font-bold uppercase mb-4 text-ferrari tracking-wider">Bid > Selling Constructor's ROFR Amount</h4>
-                    <p class="text-xs text-slate-400 mb-4">The Selling Constructor is priced out and <strong>MUST</strong> facilitate a trade.</p>
-                    <div class="bg-slate-900 p-4 rounded-lg text-[11px] border border-red-900/20">
-                        <span class="text-ferrari font-bold uppercase block mb-1 underline decoration-red-900 underline-offset-4">Selling Constructor's Discretion:</span>
-                        If multiple bidders exceed the ROFR amount, the Selling Constructor has the discretion to decide which Constructor they wish to trade with. <strong>Crucially, the Selling Constructor can ONLY sell to the Buying Constructors who have bid above the ROFR Amount.</strong>
-                        
-                        <div class="highlight-update mt-3 mb-3 p-2 block leading-relaxed">
-                            In making this decision, the Selling Constructor evaluates the <strong>'Total Trade Package' (Cash Bid + the proposed Driver from the Buying Constructor's team)</strong>. They are not required to select the bid with the highest absolute cash value, provided the chosen bid still strictly exceeds their ROFR Amount. <span class="badge-update">Updated</span>
-                        </div>
-
-                        <div class="mt-2 space-y-2">
-                            <p class="text-slate-400 italic">Rationale: Since the Selling Constructor no longer has the ability to block the trade, they retain discretion to ensure they are happy with the incoming package that will be traded.</p>
-                            <p class="text-red-400 font-bold">Note: If the incoming Driver has not yet been processed, the Selling Constructor may be at risk of losing such Driver in a subsequent trade.</p>
-                        </div>
-                        <div class="mt-3 text-[10px] text-slate-300 bg-slate-800 p-3 rounded border border-slate-700">
-                            <p class="text-[11px] uppercase font-bold text-blue-400 mb-2">Example</p> If Mercedes bid below the ROFR Amount for Mapa, and Red Bull Racing and Aston Martin bid above the ROFR Amount for Mapa, Ferrari would only be allowed to sell Mapa to either Red Bull Racing or Aston Martin, as Mercedes' bid was below Ferrari's ROFR Amount.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="step-container mb-0 pb-10">
-            <div class="step-number">4</div>
-            <h3 class="f1-font text-xl font-bold uppercase tracking-tight">Driver Veto</h3>
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-6 bg-emerald-900/10 border border-emerald-900/40 rounded-xl relative">
-                    <div class="absolute top-3 right-3 text-emerald-500 font-bold text-[10px] f1-font uppercase tracking-widest">Outcome A</div>
-                    <h4 class="f1-font text-xs text-emerald-400 mb-2 font-bold uppercase">DRIVER ACCEPTS</h4>
-                    <p class="text-[11px] text-slate-300 leading-relaxed italic">The Driver is traded to the Buying Constructor. Budget Caps are updated. The Driver is now <strong>LOCKED</strong> and cannot be traded again.</p>
-                </div>
-                <div class="p-6 bg-red-900/10 border border-red-900/40 rounded-xl relative">
-                    <div class="absolute top-3 right-3 text-red-500 font-bold text-[10px] f1-font uppercase tracking-widest">Outcome B</div>
-                    <h4 class="f1-font text-xs text-red-400 mb-2 font-bold uppercase">DRIVER VETOES</h4>
-                    <p class="text-[11px] text-slate-300 leading-relaxed italic mb-4">The Driver pays the Tier-specific Veto Fee from personal funds. Trade is cancelled. The Driver is now <strong>LOCKED</strong> and cannot be traded again.</p>
-                    
-                    <div class="grid grid-cols-4 gap-2">
-                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
-                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 1</span>
-                            <span class="text-sm text-red-400 font-bold mt-1">$100</span>
-                        </div>
-                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
-                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 1.5</span>
-                            <span class="text-sm text-red-400 font-bold mt-1">$90</span>
-                        </div>
-                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
-                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 2</span>
-                            <span class="text-sm text-red-400 font-bold mt-1">$70</span>
-                        </div>
-                        <div class="bg-slate-950 border border-slate-700 rounded-lg py-2 flex flex-col items-center justify-center">
-                            <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Tier 3</span>
-                            <span class="text-sm text-red-400 font-bold mt-1">$30</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-12 p-8 bg-blue-950/10 border-2 border-dashed border-blue-900/40 rounded-2xl text-center shadow-inner">
-                <div class="flex items-center justify-center gap-4 mb-4">
-                    <div class="w-10 h-10 flex items-center justify-center bg-blue-600 rounded-full shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    </div>
-                    <span class="f1-font text-xl font-bold text-white tracking-widest uppercase">Process Repeated</span>
-                </div>
-                <p class="text-sm text-slate-300 max-w-2xl mx-auto italic font-semibold leading-relaxed">
-                    The entire process is repeated until all Drivers have been processed - that is, the process returns to <strong class="text-blue-400 uppercase">Step 1</strong> for the next Driver determined by a fresh nomination round (i.e. all previous nominations are discarded). Locked Drivers (i.e. Drivers who have already been processed) cannot be nominated again. Once all Drivers have been processed, the Mid Season Driver Trade is officially over.
-                </p>
-                <div class="example-box mt-6 text-left border-blue-500 bg-slate-900/60 p-6">
-                    <p class="text-[11px] uppercase font-bold text-blue-400 mb-2 underline decoration-blue-900 underline-offset-4">Example</p>
-                    <p class="text-sm italic text-slate-300">
-                        Mapa is now <strong>Locked</strong>. <strong>Ferrari</strong> has gained <strong>$150</strong> (from sale) and the incoming replacement Driver. <br><br>
-                        In the next nomination round, <strong>Ferrari</strong> can use their new $150 to either bid aggressively for other Drivers or serve as a defensive shield to protect their remaining roster.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <footer class="mt-16 pt-10 border-t border-slate-800">
-            <div class="bg-red-950/10 border border-red-900/30 p-8 rounded-2xl">
-                <h4 class="f1-font text-sm text-ferrari mb-6 flex items-center gap-3 uppercase tracking-widest font-bold">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                    Important
-                </h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-[11px] text-slate-400 leading-relaxed">
-                    <p>
-                        <strong class="text-slate-200 uppercase tracking-tighter">Driver Veto Fees:</strong> Driver Veto fees must be paid <u>solely</u> from the respective Driver's personal funds. Constructors are strictly prohibited from subsidising or paying these fees.
-                    </p>
-                    <p>
-                        <strong class="text-slate-200 uppercase tracking-tighter">Market Manipulation:</strong> Constructors are STRICTLY PROHIBITED from coordinating between each other to manipulate the nomination order. This is the ONLY restriction on Constructors; they are otherwise free to openly negotiate, discuss, and plan with other Drivers and Constructors.
-                    </p>
-                </div>
-            </div>
-        </footer>
-
-        <section id="paddock-forum" class="mt-16 bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl mb-12">
-            <div class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="f1-font text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <span>💬</span> Paddock Discussion Board
-                </h3>
-                <span class="text-xs text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700">Public Q&A</span>
-            </div>
-            
-            <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 flex flex-col">
-                    <div id="forum-posts" class="flex-1 space-y-6 max-h-[600px] overflow-y-auto pr-2 forum-scroll">
-                        </div>
-                </div>
-
-                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 h-fit sticky top-6">
-                    <h4 class="f1-font text-sm font-bold text-blue-400 mb-4 uppercase tracking-wider">Submit a Question</h4>
-                    <form id="new-post-form" class="space-y-4" onsubmit="event.preventDefault(); if(window.handleNewPost) { window.handleNewPost(event); } else { alert('Connecting to the database, please wait a second and try again...'); }">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Name</label>
-                            <input type="text" id="post-name" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600" placeholder="Your name...">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Affiliation</label>
-                            <select id="post-constructor" onchange="window.toggleMainPassword()" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none">
-                                <option value="" disabled selected>Select Constructor...</option>
-                                <option value="Red Bull Racing">Red Bull Racing</option>
-                                <option value="McLaren">McLaren</option>
-                                <option value="Mercedes">Mercedes</option>
-                                <option value="Aston Martin">Aston Martin</option>
-                                <option value="Ferrari">Ferrari</option>
-                                <option value="F1 Lads League Committee">F1 Lads League Committee</option>
-                            </select>
-                        </div>
-                        <div id="post-password-container" class="hidden">
-                            <label class="block text-xs font-bold text-red-400 mb-1 uppercase">Committee Password</label>
-                            <input type="password" id="post-password" class="w-full bg-slate-900 border border-red-900/50 rounded p-2 text-sm text-white focus:border-red-500 focus:outline-none placeholder-slate-600" placeholder="Required for Committee...">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Subject</label>
-                            <input type="text" id="post-subject" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600" placeholder="Brief subject line...">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1 uppercase">Message</label>
-                            <textarea id="post-message" required rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 focus:outline-none placeholder-slate-600 resize-none" placeholder="Ask a question about the regulations..."></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition-colors text-sm f1-font uppercase tracking-wider">
-                            Post Message
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
+    <div class="login-toggle">
+        <button id="btn-constructor" class="toggle-active" onclick="setLoginMode('Constructor')">Constructor</button>
+        <button id="btn-driver" onclick="setLoginMode('Driver')">Driver</button>
+        <button id="btn-admin" onclick="setLoginMode('Admin')">Admin</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <form id="login-form" onsubmit="event.preventDefault(); login();">
+        <div id="constructor-fields">
+            <select id="constructor-select"><option value="">Select your Team…</option></select>
+            <input type="password" id="constructor-pass" placeholder="Enter Team Password">
+        </div>
+        <div id="driver-fields" class="hidden">
+            <select id="driver-select"><option value="">Select your Driver…</option></select>
+            <input type="password" id="driver-pass" placeholder="Enter Driver Password">
+        </div>
+        <div id="admin-fields" class="hidden">
+            <input type="password" id="admin-pass" placeholder="Enter Admin Password">
+        </div>
+        <button type="submit" class="btn-primary">Enter Paddock</button>
+    </form>
+</div>
 
-        // =========================================================================
-        // 🛠️ DATABASE CONFIGURATION FOR EXTERNAL DEPLOYMENT (WASMER.IO)
-        // =========================================================================
-        const MY_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyA-UFNHQedUKKHeV_UiVy_LERJCoHzGFWk",
-            authDomain: "f1-lads-league-trade-8afae.firebaseapp.com",
-            projectId: "f1-lads-league-trade-8afae",
-            storageBucket: "f1-lads-league-trade-8afae.firebasestorage.app",
-            messagingSenderId: "577290460040",
-            appId: "1:577290460040:web:5d899ebe07220a6f6db83d",
-            measurementId: "G-LRLTJFN5YH"
-        };
+<!-- ============================ MAIN APP ============================ -->
+<div class="container hidden" id="app-section">
+    <a href="https://f1lads.com">
+        <img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads Logo" class="league-logo">
+    </a>
+    <div class="header-wrapper">
+        <div class="back-arrow" onclick="logout()">← Logout</div>
+        <h1 id="welcome-title">Trade Window</h1>
+    </div>
 
-        // Use Canvas injected config if available, otherwise use your custom config for Wasmer
-        const envConfig = typeof __firebase_config !== 'undefined' && __firebase_config;
-        const firebaseConfig = envConfig ? JSON.parse(__firebase_config) : MY_FIREBASE_CONFIG;
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const collectionName = 'forum_posts';
+    <div class="phase-banner">
+        <div class="phase-label">Current Phase</div>
+        <div class="phase-name" id="phase-name">—</div>
+        <div class="countdown" id="countdown">--:--</div>
+    </div>
 
-        let posts = [];
-        let currentUser = null;
+    <div class="cap-pill" id="cap-pill">
+        <span class="lbl">Your Budget Cap</span>
+        <span class="val" id="cap-value">$—</span>
+    </div>
 
-        // Constructor styles map
-        const constructorStyles = {
-            "Red Bull Racing": { text: "text-redbull", border: "border-redbull", bg: "bg-slate-900" },
-            "McLaren": { text: "text-mclaren", border: "border-mclaren", bg: "bg-slate-900" },
-            "Mercedes": { text: "text-mercedes", border: "border-mercedes", bg: "bg-slate-900" },
-            "Aston Martin": { text: "text-aston", border: "border-aston", bg: "bg-slate-900" },
-            "Ferrari": { text: "text-ferrari", border: "border-ferrari", bg: "bg-slate-900" },
-            "F1 Lads League Committee": { text: "text-committee", border: "border-committee", bg: "bg-committee-light" }
-        };
+    <div id="content-region"></div>
+</div>
 
-        const forumContainer = document.getElementById('forum-posts');
+<script>
+    // =========================================================
+    // CONFIG
+    // =========================================================
+    const SUPABASE_URL = 'https://ofvdablhzzvjmllfkehw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mdmRhYmxoenp2am1sbGZrZWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MjQ0MDksImV4cCI6MjA5OTEwMDQwOX0.tkPKHrxhSmSjunu4LRSO3q7KXunFAznJAkMC8kEnz-Y';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Initial Authentication Flow
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Authentication Error:", error);
-            }
-        };
-        initAuth();
+    // LIVE budget caps — Constructors tab of F1 Lads MASTER sheet.
+    // Uses the gviz CSV endpoint (more CORS-friendly than /pub?output=csv).
+    const SHEET_ID = "2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg";
+    const CONSTRUCTORS_GID = "1589744882";
+    const CONSTRUCTORS_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${CONSTRUCTORS_GID}&single=true&output=csv`;
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                setupRealtimeListener();
-            }
+    const NOMINATE_SECS = 120, DECISION_SECS = 120, VETO_SECS = 120;
+
+    const ADMIN_PASSWORD = "f1ladsadmin";
+
+    // ---- Login credentials ----
+    const constructorPasswords = {
+        "Ferrari":"forzaferrari", "Aston Martin":"Mapasunkredbull",
+        "McLaren":"MCC2026", "Mercedes":"MercF1l@ds", "Red Bull":"RB123"
+    };
+    const driverPasswords = {
+        "Mapa":"1994", "Sameera":"0616", "Nuwie G":"4469", "Shahan":"0692",
+        "Rodda":"9721", "Kalpa":"1234", "Sahan":"1904", "Shiyan":"1710",
+        "Eranga":"9192", "Nippa E":"1029"
+    };
+
+    const driverImages = {
+        "Eranga":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Eranga.png",
+        "Kalpa":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Kalpa.png",
+        "Mapa":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Mapa.png",
+        "Nippa E":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/NippaE.png",
+        "Nuwie G":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/NuwieG.png",
+        "Rodda":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Rodda.png",
+        "Sahan":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Sahan.png",
+        "Sameera":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Sameera.png",
+        "Shahan":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Shahan.png",
+        "Shiyan":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/362f6f915ee8da5d8a71320b12372157ccaf5f02/Driver_Photos/Shiyan.png"
+    };
+    const teamLogos = {
+        "Aston Martin":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/AM.png",
+        "Ferrari":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/FER.png",
+        "McLaren":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MCL.png",
+        "Mercedes":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MER.png",
+        "Red Bull":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/RB.png"
+    };
+    // Fallback tier config if auction_drivers not seeded yet (no min bid per regs).
+    const tierConfig = {
+        "Mapa":{tier:"1",veto:100}, "Nuwie G":{tier:"1",veto:100},
+        "Rodda":{tier:"1.5",veto:90}, "Sahan":{tier:"1.5",veto:90},
+        "Kalpa":{tier:"2",veto:70}, "Shahan":{tier:"2",veto:70}, "Sameera":{tier:"2",veto:70},
+        "Shiyan":{tier:"3",veto:30}, "Eranga":{tier:"3",veto:30}, "Nippa E":{tier:"3",veto:30}
+    };
+
+    function getTeamColor(t){ t=(t||"").toLowerCase();
+        if(t.includes("mercedes"))return"#00D7B6"; if(t.includes("red bull"))return"#4781D7";
+        if(t.includes("ferrari"))return"#ED1131"; if(t.includes("mclaren"))return"#F47600";
+        if(t.includes("aston"))return"#229971"; return"#e10600"; }
+    function applyTheme(t){ document.documentElement.style.setProperty('--theme-color', getTeamColor(t)); }
+
+    // Normalise team names so "Red Bull Racing" == "Red Bull" == "RedBull", etc.
+    function normTeam(t){ return String(t||"").toLowerCase().replace(/racing|f1|team/g,"").replace(/[^a-z]/g,""); }
+
+    // =========================================================
+    // SESSION STATE
+    // =========================================================
+    let role="Constructor", me="";
+    let constructorsData=[], sheetCapByTeam={};
+    let liveDrivers=[], auctionState=null, capLedger=[];
+    let _nomCache=[], _bidCache=[], _tradeCache=[];
+    let _selectedTarget="", countdownTimer=null;
+
+    // =========================================================
+    // CSV PARSER
+    // =========================================================
+    async function fetchCSV(url){
+        const u = url + (url.includes('?')?'&':'?') + "nocache=" + Date.now();
+        const r = await fetch(u, {cache:"no-store"});
+        const txt = (await r.text()).replace(/\r/g,'');
+        const rows=[];
+        txt.split('\n').forEach(line=>{
+            if(!line.trim())return;
+            const arr=[]; let q=false, cell='';
+            for(let i=0;i<line.length;i++){ const c=line[i],n=line[i+1];
+                if(c==='"'&&q&&n==='"'){cell+=c;i++;continue;}
+                if(c==='"'){q=!q;continue;}
+                if(c===','&&!q){arr.push(cell.trim());cell='';continue;}
+                cell+=c; }
+            arr.push(cell.trim()); rows.push(arr);
         });
+        return rows.slice(1);
+    }
+    function parseSheetNumber(v){ let s=String(v||"0").trim();
+        let neg=s.includes('-')||(s.includes('(')&&s.includes(')'));
+        let n=parseFloat(s.replace(/[^0-9.]/g,"")); if(isNaN(n))return 0; return neg?-n:n; }
 
-        // Sync forum posts from Firestore
-        function setupRealtimeListener() {
-            if (!currentUser) return;
-            const postsRef = collection(db, 'artifacts', appId, 'public', 'data', collectionName);
-            
-            onSnapshot(postsRef, (snapshot) => {
-                posts = [];
-                snapshot.forEach(document => {
-                    posts.push({ id: document.id, ...document.data() });
-                });
-                
-                // Sort by creation time manually
-                posts.sort((a, b) => a.createdAt - b.createdAt);
-                renderPosts();
-            }, (error) => {
-                console.error("Firestore Listen Error:", error);
-            });
+    // Live cap = Sheet starting cap + SUM(ledger deltas), name-tolerant.
+    function liveCap(team){
+        let base = sheetCapByTeam[normTeam(team)] || 0;
+        capLedger.filter(l=>normTeam(l.constructor)===normTeam(team)).forEach(l=> base += Number(l.delta));
+        return base;
+    }
+
+    function setLoginMode(mode){
+        role=mode;
+        document.querySelectorAll('.login-toggle button').forEach(b=>b.classList.remove('toggle-active'));
+        document.getElementById('btn-'+mode.toLowerCase()).classList.add('toggle-active');
+        document.getElementById('constructor-fields').classList.toggle('hidden', mode!=='Constructor');
+        document.getElementById('driver-fields').classList.toggle('hidden', mode!=='Driver');
+        document.getElementById('admin-fields').classList.toggle('hidden', mode!=='Admin');
+    }
+
+    // =========================================================
+    // INITIAL LOAD
+    // =========================================================
+    window.onload = async () => {
+        // 1. Supabase state (authoritative)
+        try {
+            await refreshAll();
+            updateLoginStatus();
+            supabaseClient.channel('auction-live')
+                .on('postgres_changes',{event:'*',schema:'public',table:'auction_state'}, onRealtime)
+                .on('postgres_changes',{event:'*',schema:'public',table:'auction_nominations'}, onRealtime)
+                .on('postgres_changes',{event:'*',schema:'public',table:'auction_bids'}, onRealtime)
+                .on('postgres_changes',{event:'*',schema:'public',table:'auction_drivers'}, onRealtime)
+                .on('postgres_changes',{event:'*',schema:'public',table:'auction_cap_ledger'}, onRealtime)
+                .subscribe();
+        } catch(e){
+            console.error(e);
+            document.getElementById('login-status').innerText = "Could not reach database — check Supabase keys / Realtime.";
+        }
+        // 2. Live caps from Sheet (isolated, non-fatal)
+        try {
+            constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
+            constructorsData.forEach(c=>{ const team=c[0]; if(!team)return;
+                sheetCapByTeam[normTeam(team)] = parseSheetNumber(c[6]); });
+        } catch(e){ console.warn("Could not load caps from Sheet:", e); }
+        // 3. Dropdowns (Supabase-first, hardcoded fallback)
+        populateLoginDropdowns();
+    };
+
+    async function onRealtime(){ await refreshAll(); updateLoginStatus();
+        if(!document.getElementById('app-section').classList.contains('hidden')) render(); }
+
+    async function refreshAll(){
+        const [st,dr,led,nom,bid,tr] = await Promise.all([
+            supabaseClient.from('auction_state').select('*').order('id',{ascending:false}).limit(1),
+            supabaseClient.from('auction_drivers').select('*').order('id',{ascending:true}),
+            supabaseClient.from('auction_cap_ledger').select('*'),
+            supabaseClient.from('auction_nominations').select('*'),
+            supabaseClient.from('auction_bids').select('*'),
+            supabaseClient.from('auction_trades').select('*')
+        ]);
+        auctionState = (st.data && st.data[0]) || auctionState;
+        liveDrivers  = dr.data || liveDrivers;
+        capLedger    = led.data || [];
+        _nomCache    = nom.data || [];
+        _bidCache    = bid.data || [];
+        _tradeCache  = tr.data  || [];
+    }
+
+    function updateLoginStatus(){
+        const el=document.getElementById('login-status'); if(!el)return;
+        el.innerText = (auctionState && auctionState.is_active)
+            ? `Trade LIVE — Round ${auctionState.round_no}`
+            : "Trade window not yet started by Admin.";
+    }
+
+    function populateLoginDropdowns(){
+        const cSel=document.getElementById('constructor-select');
+        const dSel=document.getElementById('driver-select');
+        cSel.innerHTML='<option value="">Select your Team…</option>';
+        dSel.innerHTML='<option value="">Select your Driver…</option>';
+        let teams = (liveDrivers && liveDrivers.length) ? [...new Set(liveDrivers.map(d=>d.original_team))].sort() : [];
+        if(!teams.length) teams = Object.keys(constructorPasswords);
+        teams.forEach(t=> cSel.innerHTML += `<option value="${t}">${t}</option>`);
+        let drivers = (liveDrivers && liveDrivers.length) ? liveDrivers.map(d=>d.driver) : [];
+        if(!drivers.length) drivers = Object.keys(driverPasswords);
+        drivers.forEach(d=> dSel.innerHTML += `<option value="${d}">${d}</option>`);
+    }
+
+    // =========================================================
+    // LOGIN
+    // =========================================================
+    async function login(){
+        if(role==='Constructor'){
+            const team=document.getElementById('constructor-select').value;
+            const pass=document.getElementById('constructor-pass').value;
+            if(!team || constructorPasswords[team]!==pass){ alert("Incorrect team or password."); return; }
+            me=team; applyTheme(team);
+        } else if(role==='Driver'){
+            const drv=document.getElementById('driver-select').value;
+            const pass=document.getElementById('driver-pass').value;
+            if(!drv || driverPasswords[drv]!==pass){ alert("Incorrect driver or password."); return; }
+            me=drv;
+            const ld=liveDrivers.find(x=>x.driver===drv); applyTheme(ld?ld.current_team:"");
+        } else {
+            const pass=document.getElementById('admin-pass').value;
+            if(pass!==ADMIN_PASSWORD){ alert("Incorrect admin password."); return; }
+            me="Admin"; applyTheme("");
+        }
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('app-section').classList.remove('hidden');
+        document.getElementById('welcome-title').innerText = role==='Admin' ? "Admin Control" : me;
+        render();
+    }
+    function logout(){ window.location.reload(); }
+
+    // =========================================================
+    // COUNTDOWN
+    // =========================================================
+    function startCountdown(){
+        if(countdownTimer) clearInterval(countdownTimer);
+        const el=document.getElementById('countdown');
+        const tick=()=>{
+            if(!auctionState || !auctionState.phase_deadline){ el.innerText="--:--"; el.classList.remove('urgent'); return; }
+            const diff=new Date(auctionState.phase_deadline).getTime()-Date.now();
+            if(diff<=0){ el.innerText="00:00"; el.classList.add('urgent'); if(role==='Admin') autoAdvance(); return; }
+            const m=Math.floor(diff/60000), s=Math.floor((diff%60000)/1000);
+            el.innerText=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            el.classList.toggle('urgent', diff<30000);
+        };
+        tick(); countdownTimer=setInterval(tick,1000);
+    }
+
+    // =========================================================
+    // MASTER RENDER
+    // =========================================================
+    function render(){
+        updateLoginStatus();
+        const phase = auctionState ? auctionState.phase : 'idle';
+        document.getElementById('phase-name').innerText = phaseLabel(phase);
+        startCountdown();
+
+        const capPill=document.getElementById('cap-pill');
+        if(role==='Constructor'){ capPill.style.display='flex';
+            document.getElementById('cap-value').innerText = `$${liveCap(me).toFixed(2)}`; }
+        else capPill.style.display='none';
+
+        const region=document.getElementById('content-region');
+        if(role==='Admin')       region.innerHTML = renderAdmin(phase);
+        else if(role==='Driver') region.innerHTML = renderDriver(phase);
+        else                     region.innerHTML = renderConstructor(phase);
+    }
+
+    function phaseLabel(p){ return {
+        idle:"Awaiting Start", nominate:"Silent Nomination", bidding:"Final Bidding",
+        settlement:"Trade Settlement", veto:"Driver Veto", complete:"Trade Window Closed"
+    }[p] || p; }
+
+    // =========================================================
+    // DRIVER LINE-UP GRID
+    // =========================================================
+    function driverGridHtml(opts={}){
+        let html='<div class="driver-grid">';
+        liveDrivers.forEach(d=>{
+            const cfg=tierConfig[d.driver]||{tier:d.tier,veto:d.veto_fee};
+            const isMineOwn = (role==='Constructor' && d.current_team===me);
+            const locked=d.locked;
+            let cls='driver-card';
+            if(locked) cls+=' locked';
+            if(opts.selectable && !locked && !(opts.excludeTeam && isMineOwn) && opts.selectedName===d.driver) cls+=' selected';
+            if(opts.selectable && (locked || (opts.excludeTeam && isMineOwn))) cls+=' disabled';
+            if(isMineOwn) cls+=' mine';
+            const onclick = (opts.selectable && !locked && !(opts.excludeTeam && isMineOwn))
+                ? `onclick="selectTarget('${d.driver.replace(/'/g,"")}')"` : '';
+            const corner = locked ? `<span class="lock-tag">Locked</span>` : '';
+            html+=`<div class="${cls}" ${onclick}>
+                <div class="avatar-wrapper"><img class="driver-avatar" src="${driverImages[d.driver]||''}" alt="${d.driver}"></div>
+                <div class="driver-meta">
+                    <span class="driver-name">${d.driver}</span>
+                    <span class="driver-team"><img src="${teamLogos[d.current_team]||''}">${d.current_team}</span>
+                    <span class="tier-badge">Tier ${cfg.tier}</span>
+                </div>${corner}
+            </div>`;
+        });
+        return html+'</div>';
+    }
+    window.selectTarget=function(name){ _selectedTarget=name; render(); };
+
+    // =========================================================
+    // CONSTRUCTOR VIEW
+    // =========================================================
+    function renderConstructor(phase){
+        if(phase==='idle') return statusMsg("⏳","The trade window hasn't started yet. Wait for the Admin to open the first nomination round.");
+        if(phase==='complete') return renderTradeLog("🏁 The Mid-Season Trade Window is closed.");
+
+        if(phase==='nominate'){
+            const myDrivers=liveDrivers.filter(d=>d.current_team===me && !d.locked);
+            const already=_nomCache.find(n=>n.constructor===me && n.round_no===auctionState.round_no);
+            if(already){
+                return `<div class="section-box"><div class="status-msg"><span class="big-icon">✅</span>
+                    Your nomination is locked in for this round:<br><br>
+                    <strong>${already.target_driver}</strong> — Bid $${Number(already.cash_bid).toFixed(0)} + ${already.offered_driver}
+                    <br><br><span class="info-line">Waiting for other constructors & the timer…</span></div></div>`;
+            }
+            return `
+            ${rulesBox()}
+            <div class="section-box">
+                <h1 style="font-size:18px;color:var(--theme-color);text-align:center;">Nominate a Driver to Target</h1>
+                <p class="info-line">Pick ONE un-locked driver you don't own. Your nomination is silent.</p>
+                ${driverGridHtml({selectable:true, selectedName:_selectedTarget, excludeTeam:true})}
+                <div style="margin-top:16px;">
+                    <label style="font-size:13px;color:#aaa;">Cash Bid (max $${liveCap(me).toFixed(0)})</label>
+                    <input type="number" id="nom-cash" placeholder="Enter cash amount" min="0" max="${liveCap(me).toFixed(0)}">
+                    <label style="font-size:13px;color:#aaa;">Driver from your team to offer in swap</label>
+                    <select id="nom-swap"><option value="">Select your driver…</option>
+                        ${myDrivers.map(d=>`<option value="${d.driver}">${d.driver} (Tier ${(tierConfig[d.driver]||{}).tier})</option>`).join('')}
+                    </select>
+                </div>
+                <button class="btn-primary" style="margin-top:14px;" onclick="submitNomination()">Submit Silent Nomination</button>
+            </div>`;
         }
 
-        function renderPosts() {
-            forumContainer.innerHTML = '';
-            
-            if (posts.length === 0) {
-                forumContainer.innerHTML = '<p class="text-slate-500 text-sm italic">No discussions yet. Be the first to ask a question.</p>';
-                return;
-            }
+        if(phase==='bidding'){
+            const t=auctionState.target_driver;
+            const iAmSeller=liveDrivers.find(d=>d.driver===t)?.current_team===me;
+            const iNominated=_nomCache.find(n=>n.constructor===me && n.round_no===auctionState.round_no);
+            const iNominatedTarget=iNominated && iNominated.target_driver===t;
+            const alreadyBid=_bidCache.find(b=>b.constructor===me && b.target_driver===t && b.round_no===auctionState.round_no);
 
-            posts.forEach(post => {
-                const style = constructorStyles[post.constructor] || { text: "text-slate-400", border: "border-slate-500", bg: "bg-slate-900" };
-                const isPostMine = currentUser && post.userId === currentUser.uid;
-                const subjectHtml = post.subject ? `<h4 class="text-lg font-bold text-white mt-1 mb-2">${post.subject}</h4>` : '';
-                
-                let repliesHtml = '';
-                if (post.replies && post.replies.length > 0) {
-                    // Reddit-style thread indentation
-                    repliesHtml = `<div class="mt-4 ml-2 pl-4 border-l-2 border-slate-700 space-y-5">`;
-                    post.replies.forEach(reply => {
-                        const rStyle = constructorStyles[reply.constructor] || { text: "text-slate-400", border: "border-slate-500", bg: "bg-slate-900" };
-                        const isReplyMine = currentUser && reply.userId === currentUser.uid;
-                        const deleteReplyBtn = isReplyMine ? `<button type="button" onclick="window.deleteReply('${post.id}', '${reply.id}')" class="text-red-500 hover:text-red-400 ml-2" title="Delete Reply"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : '';
-                        
-                        repliesHtml += `
-                            <div class="text-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="font-bold text-slate-200">${reply.author}</span>
-                                    <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${rStyle.text} ${rStyle.border} ${rStyle.bg}">${reply.constructor}</span>
-                                    <span class="text-xs text-slate-500 ml-auto flex items-center">${reply.timestamp}${deleteReplyBtn}</span>
-                                </div>
-                                <p class="text-slate-300 leading-relaxed">${reply.text}</p>
-                            </div>
-                        `;
-                    });
-                    repliesHtml += `</div>`;
+            if(iAmSeller) return statusMsg("🛡️",`You own <strong>${t}</strong>. Sit tight — sealed bids are coming in. You'll get to decide once bidding closes.`);
+            if(!iNominated) return statusMsg("🚫","You didn't nominate this round, so you're barred from bidding in this cycle.");
+            if(iNominatedTarget) return statusMsg("🔒",`Your original nomination for <strong>${t}</strong> is locked and counts as your bid. Waiting for the timer…`);
+            if(alreadyBid) return statusMsg("✅",`Your final bid on <strong>${t}</strong> is locked: $${Number(alreadyBid.cash_bid).toFixed(0)} + ${alreadyBid.offered_driver}.`);
+
+            const myDrivers=liveDrivers.filter(d=>d.current_team===me && !d.locked);
+            return `<div class="section-box">
+                <h1 style="font-size:18px;color:var(--theme-color);text-align:center;">Final Bid — Target: ${t}</h1>
+                <p class="info-line">You nominated another driver but participated, so you may place ONE sealed bid here.</p>
+                <label style="font-size:13px;color:#aaa;">Cash Bid (max $${liveCap(me).toFixed(0)})</label>
+                <input type="number" id="bid-cash" placeholder="Enter cash amount" min="0" max="${liveCap(me).toFixed(0)}">
+                <label style="font-size:13px;color:#aaa;">Driver to offer in swap</label>
+                <select id="bid-swap"><option value="">Select your driver…</option>
+                    ${myDrivers.map(d=>`<option value="${d.driver}">${d.driver}</option>`).join('')}
+                </select>
+                <button class="btn-primary" style="margin-top:14px;" onclick="submitBid()">Submit Final Bid</button>
+            </div>`;
+        }
+
+        if(phase==='settlement'){
+            const t=auctionState.target_driver;
+            const iAmSeller=liveDrivers.find(d=>d.driver===t)?.current_team===me;
+            if(iAmSeller) return renderSellerDecision(t);
+            return statusMsg("⚖️",`Bids are in for <strong>${t}</strong>. The selling constructor is deciding. Hang tight…`);
+        }
+
+        if(phase==='veto') return statusMsg("🏁",`Trade for <strong>${auctionState.target_driver}</strong> agreed — pending the driver's veto decision (2 min).`);
+        return "";
+    }
+
+    function renderSellerDecision(t){
+        const bids=allBidsForTarget(t);
+        if(bids.length===0) return statusMsg("🤷","No valid bids were received for this driver. The round will reset.");
+        const rofr=liveCap(me);
+        const topBid=Math.max(...bids.map(b=>b.cash_bid));
+        let html=`<div class="section-box"><h1 style="font-size:18px;color:var(--theme-color);text-align:center;">Settle ${t}</h1>
+            <p class="info-line">Your ROFR Amount (live cap) = $${rofr.toFixed(0)}. Highest bid = $${topBid.toFixed(0)}.</p><div style="margin:12px 0;">`;
+        bids.sort((a,b)=>b.cash_bid-a.cash_bid).forEach(b=>{
+            const isAbove=b.cash_bid>rofr;
+            html+=`<div class="bid-row ${isAbove?'above':'below'}">
+                <div class="bid-info"><span class="bid-team">${b.constructor}</span>
+                    <span class="bid-detail">Package: $${b.cash_bid.toFixed(0)} + ${b.offered_driver}</span></div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span class="bid-amount">$${b.cash_bid.toFixed(0)}</span>
+                    ${(topBid<=rofr || isAbove)?`<button class="choose-btn" onclick="acceptSale('${b.constructor}',${b.cash_bid},'${b.offered_driver}')">Sell</button>`:''}
+                </div></div>`;
+        });
+        html+='</div>';
+        if(topBid<=rofr){
+            html+=`<div class="option-box"><h3>Option A — Match & Defend</h3>
+                <p>Pay the top bid ($${topBid.toFixed(0)}) to the League, keep ${t}. Your cap drops by $${topBid.toFixed(0)} and ${t} becomes LOCKED.</p>
+                <button class="btn-primary" onclick="matchDefend(${topBid})">Match & Defend ($${topBid.toFixed(0)})</button></div>
+                <p class="info-line">…or choose a bidder above for a Voluntary Sale (must sell to highest bidder).</p>`;
+        } else {
+            html+=`<div class="admin-warn">You are priced out (top bid exceeds your cap). You MUST sell — choose any bidder who bid above your ROFR ($${rofr.toFixed(0)}).</div>`;
+        }
+        return html+'</div>';
+    }
+
+    // =========================================================
+    // DRIVER VIEW
+    // =========================================================
+    function renderDriver(phase){
+        const meDrv=liveDrivers.find(d=>d.driver===me);
+        if(phase==='veto' && auctionState.target_driver===me && auctionState.winning_team){
+            const cfg=tierConfig[me]||{veto:meDrv?meDrv.veto_fee:0};
+            return `<div class="section-box"><h1 style="font-size:18px;color:var(--theme-color);text-align:center;">You've Been Traded!</h1>
+                <p class="info-line">${auctionState.seller_team} → <strong>${auctionState.winning_team}</strong> for $${Number(auctionState.winning_bid).toFixed(0)} (swap: ${auctionState.winning_swap}).</p>
+                <div class="option-box"><h3>Accept the Trade</h3><p>You join ${auctionState.winning_team}. You'll be LOCKED for the rest of the window.</p>
+                    <button class="btn-primary" onclick="driverAccept()">Accept Trade</button></div>
+                <div class="option-box" style="border-color:#ff4444;"><h3>Veto (pay $${cfg.veto})</h3>
+                    <p>Pay your Tier veto fee from personal funds to block the trade & stay put. You'll be LOCKED either way.</p>
+                    <button class="btn-primary" style="background:#ff4444;" onclick="driverVeto(${cfg.veto})">Veto — Pay $${cfg.veto}</button></div></div>`;
+        }
+        if(meDrv && meDrv.locked) return statusMsg("🔒",`You are LOCKED — no further trades affect you. Current team: <strong>${meDrv.current_team}</strong>.`);
+        return statusMsg("👀",`Nothing needs your action right now. If a bid is accepted for you, your veto decision appears here. Current team: <strong>${meDrv?meDrv.current_team:'—'}</strong>.`);
+    }
+
+    // =========================================================
+    // ADMIN VIEW
+    // =========================================================
+    function renderAdmin(phase){
+        const activeUnlocked=liveDrivers.filter(d=>!d.locked).length;
+        let html=`<div class="section-box"><h1 style="font-size:18px;color:var(--theme-color);text-align:center;">Phase Control</h1>
+            <p class="info-line">Round ${auctionState?auctionState.round_no:1} • Phase: ${phaseLabel(phase)} • ${activeUnlocked} drivers still tradeable</p>`;
+        if(phase==='idle' || phase==='complete'){
+            html += activeUnlocked>0
+                ? `<button class="btn-primary" onclick="adminStartRound()">▶ Start Nomination Round (2:00)</button>`
+                : `<div class="admin-warn">All drivers processed — the trade window is complete.</div>`;
+        } else {
+            html+=`<div class="admin-warn">Round in progress — auto-advancing on timers. Use override only if stuck.</div>
+                   <button class="btn-primary" style="background:#555;" onclick="autoAdvance()">⏭ Force Advance Phase</button>
+                   <button class="btn-primary" style="background:#ff4444;margin-top:10px;" onclick="adminCancelRound()">✖ Cancel / Reset This Round</button>`;
+        }
+        html+='</div>';
+        if(phase==='nominate'){
+            const tally=tallyNominations();
+            html+=`<div class="section-box"><h3 style="color:var(--theme-color);">Live Nomination Tally</h3>`;
+            const keys=Object.keys(tally).sort((a,b)=>tally[b]-tally[a]);
+            html+= keys.length? keys.map(k=>`<div class="bid-row"><span class="bid-team">${k}</span><span class="bid-amount">${tally[k]} nom${tally[k]>1?'s':''}</span></div>`).join('')
+                : `<p class="info-line">No nominations yet.</p>`;
+            html+='</div>';
+        }
+        html+=renderTradeLog("Trade History");
+        return html;
+    }
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+    function tallyNominations(){
+        const t={}; _nomCache.filter(n=>n.round_no===auctionState.round_no)
+            .forEach(n=>{ t[n.target_driver]=(t[n.target_driver]||0)+1; }); return t;
+    }
+    function allBidsForTarget(t){
+        const map={};
+        _nomCache.filter(n=>n.round_no===auctionState.round_no && n.target_driver===t)
+            .forEach(n=>map[n.constructor]={constructor:n.constructor,cash_bid:Number(n.cash_bid),offered_driver:n.offered_driver});
+        _bidCache.filter(b=>b.round_no===auctionState.round_no && b.target_driver===t)
+            .forEach(b=>map[b.constructor]={constructor:b.constructor,cash_bid:Number(b.cash_bid),offered_driver:b.offered_driver});
+        return Object.values(map);
+    }
+    function statusMsg(icon,txt){ return `<div class="section-box"><div class="status-msg"><span class="big-icon">${icon}</span>${txt}</div></div>`; }
+    function rulesBox(){ return `<details class="rules-accordion"><summary style="color:var(--theme-color);">Trade Rules</summary><ul>
+        <li>Submit exactly ONE silent nomination: an un-locked driver you don't own + cash bid + one of your own drivers to swap.</li>
+        <li>Most-nominated driver is auctioned first (ties: championship points → tier → Admin draw).</li>
+        <li>Fail to nominate = barred from all bidding this cycle.</li>
+        <li>Bid ≤ seller's cap: seller may Match & Defend (pay to League, driver locked) or sell to highest bidder.</li>
+        <li>Bid &gt; seller's cap: seller is priced out & must sell, choosing among bids above their cap.</li>
+        <li>Traded driver may Accept or Veto (pay tier fee). Either way they're LOCKED.</li></ul></details>`; }
+    function renderTradeLog(title){
+        let html=`<div class="section-box"><h3 style="color:var(--theme-color);text-align:center;">${title}</h3>`;
+        if(_tradeCache.length===0) html+=`<p class="info-line">No trades processed yet.</p>`;
+        _tradeCache.slice().reverse().forEach(tr=>{
+            let line='';
+            if(tr.outcome==='traded') line=`<strong>${tr.driver_out}</strong> → ${tr.buyer_team} for $${Number(tr.cash_amount).toFixed(0)} (swap in: ${tr.driver_in})`;
+            else if(tr.outcome==='rofr_defended') line=`${tr.seller_team} defended <strong>${tr.driver_out}</strong> (paid $${Number(tr.cash_amount).toFixed(0)})`;
+            else if(tr.outcome==='vetoed') line=`<strong>${tr.driver_out}</strong> VETOED the trade (fee $${Number(tr.veto_fee_paid).toFixed(0)})`;
+            html+=`<div class="trade-log-item">${line}<div class="to">Round ${tr.round_no}</div></div>`;
+        });
+        return html+'</div>';
+    }
+
+    // =========================================================
+    // ACTION HANDLERS
+    // =========================================================
+    window.submitNomination = async function(){
+        const cash=parseFloat(document.getElementById('nom-cash').value)||0;
+        const swap=document.getElementById('nom-swap').value;
+        if(!_selectedTarget){ alert("Select a driver to target."); return; }
+        if(!swap){ alert("Choose one of your own drivers to offer."); return; }
+        if(cash>liveCap(me)){ alert("Bid exceeds your budget cap."); return; }
+        const {error}=await supabaseClient.from('auction_nominations').insert([{
+            round_no:auctionState.round_no, constructor:me,
+            target_driver:_selectedTarget, cash_bid:cash, offered_driver:swap }]);
+        if(error){ alert("Could not save nomination (already nominated this round?)."); return; }
+        _selectedTarget=""; await refreshAll(); render();
+    };
+
+    window.submitBid = async function(){
+        const cash=parseFloat(document.getElementById('bid-cash').value)||0;
+        const swap=document.getElementById('bid-swap').value;
+        const t=auctionState.target_driver;
+        if(!swap){ alert("Choose a driver to offer."); return; }
+        if(cash>liveCap(me)){ alert("Bid exceeds your budget cap."); return; }
+        const {error}=await supabaseClient.from('auction_bids').insert([{
+            round_no:auctionState.round_no, target_driver:t, constructor:me,
+            cash_bid:cash, offered_driver:swap }]);
+        if(error){ alert("Could not save bid (already bid?)."); return; }
+        await refreshAll(); render();
+    };
+
+    window.matchDefend = async function(topBid){
+        const t=auctionState.target_driver;
+        if(!confirm(`Match $${topBid} to keep ${t}? Your cap drops by $${topBid} and ${t} locks.`)) return;
+        await supabaseClient.from('auction_cap_ledger').insert([{round_no:auctionState.round_no,constructor:me,delta:-topBid,reason:'rofr_defend'}]);
+        await supabaseClient.from('auction_drivers').update({locked:true,updated_at:new Date().toISOString()}).eq('driver',t);
+        await supabaseClient.from('auction_trades').insert([{round_no:auctionState.round_no,target_driver:t,seller_team:me,cash_amount:topBid,driver_out:t,outcome:'rofr_defended'}]);
+        await advanceToNextOrEnd();
+    };
+
+    window.acceptSale = async function(buyer,cash,swap){
+        const t=auctionState.target_driver;
+        if(!confirm(`Sell ${t} to ${buyer} for $${cash} (receiving ${swap})?`)) return;
+        const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
+        await supabaseClient.from('auction_state').update({
+            phase:'veto', winning_team:buyer, winning_bid:cash, winning_swap:swap, phase_deadline:deadline
+        }).eq('id',auctionState.id);
+        await refreshAll(); render();
+    };
+
+    window.driverAccept = async function(){
+        const s=auctionState, t=s.target_driver;
+        await executeTrade(s.seller_team, s.winning_team, t, s.winning_swap, Number(s.winning_bid));
+        await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),driver_in:s.winning_swap,driver_out:t,outcome:'traded'}]);
+        await advanceToNextOrEnd();
+    };
+
+    window.driverVeto = async function(fee){
+        const s=auctionState, t=s.target_driver;
+        await supabaseClient.from('auction_drivers').update({locked:true,updated_at:new Date().toISOString()}).eq('driver',t);
+        await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),outcome:'vetoed',veto_fee_paid:fee,driver_out:t}]);
+        await advanceToNextOrEnd();
+    };
+
+    async function executeTrade(seller,buyer,target,swapDriver,cash){
+        await supabaseClient.from('auction_cap_ledger').insert([
+            {round_no:auctionState.round_no,constructor:buyer,delta:-cash,reason:'buy'},
+            {round_no:auctionState.round_no,constructor:seller,delta:cash,reason:'sell'}
+        ]);
+        await supabaseClient.from('auction_drivers').update({current_team:buyer,locked:true,updated_at:new Date().toISOString()}).eq('driver',target);
+        await supabaseClient.from('auction_drivers').update({current_team:seller,updated_at:new Date().toISOString()}).eq('driver',swapDriver);
+    }
+
+    // =========================================================
+    // ADMIN / PHASE ENGINE
+    // =========================================================
+    window.adminStartRound = async function(){
+        const roundNo = (_tradeCache.length===0) ? (auctionState.round_no||1) : (auctionState.round_no+1);
+        const deadline=new Date(Date.now()+NOMINATE_SECS*1000).toISOString();
+        await supabaseClient.from('auction_state').update({
+            is_active:true, round_no:roundNo, phase:'nominate',
+            target_driver:null, seller_team:null, winning_team:null, winning_bid:null, winning_swap:null,
+            phase_deadline:deadline
+        }).eq('id',auctionState.id);
+        await refreshAll(); render();
+    };
+
+    window.adminCancelRound = async function(){
+        if(!confirm("Reset this round? Nominations & bids for the current round will be cleared and the trade set back to idle.")) return;
+        await supabaseClient.from('auction_nominations').delete().eq('round_no',auctionState.round_no);
+        await supabaseClient.from('auction_bids').delete().eq('round_no',auctionState.round_no);
+        await supabaseClient.from('auction_state').update({
+            is_active:false, phase:'idle', target_driver:null, seller_team:null,
+            winning_team:null, winning_bid:null, winning_swap:null, phase_deadline:null
+        }).eq('id',auctionState.id);
+        await refreshAll(); render();
+    };
+
+    let _advancing=false;
+    async function autoAdvance(){
+        if(_advancing) return; _advancing=true;
+        try{
+            await refreshAll();
+            const p=auctionState.phase;
+            if(p==='nominate'){
+                const tally=tallyNominations();
+                const keys=Object.keys(tally);
+                if(keys.length===0){
+                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null}).eq('id',auctionState.id);
+                    await refreshAll(); render(); return;
                 }
+                const max=Math.max(...keys.map(k=>tally[k]));
+                let leaders=keys.filter(k=>tally[k]===max);
+                let target=leaders[0];
+                if(leaders.length>1 && role==='Admin'){
+                    const pick=prompt(`Tie between: ${leaders.join(', ')}.\nType the driver to process first:`,leaders[0]);
+                    if(pick && leaders.includes(pick.trim())) target=pick.trim();
+                }
+                const seller=liveDrivers.find(d=>d.driver===target).current_team;
+                const deadline=new Date(Date.now()+NOMINATE_SECS*1000).toISOString();
+                await supabaseClient.from('auction_state').update({phase:'bidding',target_driver:target,seller_team:seller,phase_deadline:deadline}).eq('id',auctionState.id);
+            }
+            else if(p==='bidding'){
+                const t=auctionState.target_driver;
+                const bids=allBidsForTarget(t);
+                if(bids.length===0){
+                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null}).eq('id',auctionState.id);
+                } else {
+                    const deadline=new Date(Date.now()+DECISION_SECS*1000).toISOString();
+                    await supabaseClient.from('auction_state').update({phase:'settlement',phase_deadline:deadline}).eq('id',auctionState.id);
+                }
+            }
+            else if(p==='settlement'){
+                const t=auctionState.target_driver;
+                const bids=allBidsForTarget(t); const rofr=liveCap(auctionState.seller_team);
+                const top=Math.max(...bids.map(b=>b.cash_bid));
+                if(top>rofr){
+                    const best=bids.filter(b=>b.cash_bid>rofr).sort((a,b)=>b.cash_bid-a.cash_bid)[0];
+                    const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
+                    await supabaseClient.from('auction_state').update({phase:'veto',winning_team:best.constructor,winning_bid:best.cash_bid,winning_swap:best.offered_driver,phase_deadline:deadline}).eq('id',auctionState.id);
+                } else {
+                    await supabaseClient.from('auction_cap_ledger').insert([{round_no:auctionState.round_no,constructor:auctionState.seller_team,delta:-top,reason:'rofr_defend'}]);
+                    await supabaseClient.from('auction_drivers').update({locked:true}).eq('driver',t);
+                    await supabaseClient.from('auction_trades').insert([{round_no:auctionState.round_no,target_driver:t,seller_team:auctionState.seller_team,cash_amount:top,driver_out:t,outcome:'rofr_defended'}]);
+                    await advanceToNextOrEnd(); _advancing=false; return;
+                }
+            }
+            else if(p==='veto'){
+                const s=auctionState, t=s.target_driver;
+                await executeTrade(s.seller_team,s.winning_team,t,s.winning_swap,Number(s.winning_bid));
+                await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),driver_in:s.winning_swap,driver_out:t,outcome:'traded'}]);
+                await advanceToNextOrEnd(); _advancing=false; return;
+            }
+            await refreshAll(); render();
+        } finally { _advancing=false; }
+    }
 
-                const deletePostBtn = isPostMine ? `<button type="button" onclick="window.deletePost('${post.id}')" class="text-red-500 hover:text-red-400 ml-2" title="Delete Post"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>` : '';
-
-                const postHtml = `
-                    <div class="bg-slate-900 rounded-xl p-5 border border-slate-700 shadow-sm">
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                            <span class="font-bold text-white">${post.author}</span>
-                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${style.text} ${style.border} ${style.bg} w-fit">${post.constructor}</span>
-                            <span class="text-xs text-slate-500 sm:ml-auto flex items-center">${post.timestamp}${deletePostBtn}</span>
-                        </div>
-                        ${subjectHtml}
-                        <p class="text-slate-300 text-sm leading-relaxed mb-4">${post.text}</p>
-                        
-                        <button type="button" onclick="window.toggleReplyForm('${post.id}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                            Reply
-                        </button>
-
-                        <form id="reply-form-${post.id}" class="hidden mt-4 space-y-3 p-4 bg-slate-800 rounded border border-slate-600" onsubmit="event.preventDefault(); if(window.handleNewReply) { window.handleNewReply(event, '${post.id}'); } else { alert('Connecting to the database, please wait a second and try again...'); }">
-                            <div class="flex gap-3">
-                                <input type="text" id="reply-name-${post.id}" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none" placeholder="Name">
-                                <select id="reply-constructor-${post.id}" onchange="window.toggleReplyPassword('${post.id}')" required class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none">
-                                    <option value="" disabled selected>Team</option>
-                                    <option value="Red Bull Racing">Red Bull Racing</option>
-                                    <option value="McLaren">McLaren</option>
-                                    <option value="Mercedes">Mercedes</option>
-                                    <option value="Aston Martin">Aston Martin</option>
-                                    <option value="Ferrari">Ferrari</option>
-                                    <option value="F1 Lads League Committee">F1 Lads League Committee</option>
-                                </select>
-                            </div>
-                            <div id="reply-password-container-${post.id}" class="hidden">
-                                <input type="password" id="reply-password-${post.id}" class="w-full bg-slate-900 border border-red-900/50 rounded p-2 text-xs text-white focus:border-red-500 focus:outline-none" placeholder="Committee Password...">
-                            </div>
-                            <textarea id="reply-message-${post.id}" required rows="2" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 focus:outline-none resize-none" placeholder="Write a reply..."></textarea>
-                            <div class="flex justify-end gap-2">
-                                <button type="button" onclick="window.toggleReplyForm('${post.id}')" class="text-xs text-slate-400 hover:text-slate-200 px-3 py-1">Cancel</button>
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1 px-4 rounded transition-colors">Submit</button>
-                            </div>
-                        </form>
-
-                        ${repliesHtml}
-                    </div>
-                `;
-                forumContainer.insertAdjacentHTML('beforeend', postHtml);
-            });
-            
-            forumContainer.scrollTop = forumContainer.scrollHeight;
+    async function advanceToNextOrEnd(){
+        await refreshAll();
+        const remaining=liveDrivers.filter(d=>!d.locked).length;
+        if(remaining<=0){
+            await supabaseClient.from('auction_state').update({phase:'complete',phase_deadline:null,is_active:false}).eq('id',auctionState.id);
+        } else {
+            await supabaseClient.from('auction_state').update({phase:'idle',target_driver:null,seller_team:null,winning_team:null,winning_bid:null,winning_swap:null,phase_deadline:null}).eq('id',auctionState.id);
         }
-
-        // Exposed functions on window for inline event handlers
-        window.handleNewPost = async function(e) {
-            if (e) e.preventDefault();
-            
-            if (!currentUser) {
-                alert("Still connecting to the database. Please try again in a few seconds.");
-                return;
-            }
-
-            const nameInput = document.getElementById('post-name');
-            const constInput = document.getElementById('post-constructor');
-            const subjInput = document.getElementById('post-subject');
-            const msgInput = document.getElementById('post-message');
-            const pwdInput = document.getElementById('post-password');
-
-            if (constInput.value === "F1 Lads League Committee" && pwdInput.value !== "F1LADS2026") {
-                alert("Incorrect Committee password.");
-                return;
-            }
-
-            const newPostId = Date.now().toString();
-            const dateStr = new Date().toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
-
-            const newPost = {
-                author: nameInput.value,
-                constructor: constInput.value,
-                subject: subjInput.value,
-                text: msgInput.value,
-                timestamp: dateStr,
-                createdAt: Date.now(),
-                replies: [],
-                userId: currentUser.uid
-            };
-
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, newPostId), newPost);
-                
-                // Reset form
-                nameInput.value = '';
-                constInput.value = '';
-                subjInput.value = '';
-                msgInput.value = '';
-                pwdInput.value = '';
-                window.toggleMainPassword();
-            } catch (error) {
-                console.error("Error creating post:", error);
-                alert("Failed to submit question.");
-            }
-        };
-
-        window.toggleMainPassword = function() {
-            const constInput = document.getElementById('post-constructor');
-            const pwdContainer = document.getElementById('post-password-container');
-            const pwdInput = document.getElementById('post-password');
-            if (constInput.value === "F1 Lads League Committee") {
-                pwdContainer.classList.remove('hidden');
-                pwdInput.required = true;
-            } else {
-                pwdContainer.classList.add('hidden');
-                pwdInput.required = false;
-                pwdInput.value = ''; // clear on toggle away
-            }
-        };
-
-        window.toggleReplyPassword = function(postId) {
-            const constInput = document.getElementById(`reply-constructor-${postId}`);
-            const pwdContainer = document.getElementById(`reply-password-container-${postId}`);
-            const pwdInput = document.getElementById(`reply-password-${postId}`);
-            if (constInput.value === "F1 Lads League Committee") {
-                pwdContainer.classList.remove('hidden');
-                pwdInput.required = true;
-            } else {
-                pwdContainer.classList.add('hidden');
-                pwdInput.required = false;
-                pwdInput.value = ''; // clear on toggle away
-            }
-        };
-
-        window.toggleReplyForm = function(postId) {
-            const form = document.getElementById(`reply-form-${postId}`);
-            if (form) form.classList.toggle('hidden');
-        };
-
-        window.handleNewReply = async function(e, postId) {
-            if (e) e.preventDefault();
-            
-            if (!currentUser) {
-                alert("Still connecting to the database. Please try again in a few seconds.");
-                return;
-            }
-
-            const post = posts.find(p => p.id === postId.toString());
-            if (!post) return;
-
-            const nameInput = document.getElementById(`reply-name-${postId}`);
-            const constInput = document.getElementById(`reply-constructor-${postId}`);
-            const msgInput = document.getElementById(`reply-message-${postId}`);
-            const pwdInput = document.getElementById(`reply-password-${postId}`);
-
-            if (constInput.value === "F1 Lads League Committee" && pwdInput.value !== "F1LADS2026") {
-                alert("Incorrect Committee password.");
-                return;
-            }
-
-            const dateStr = new Date().toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
-
-            const newReply = {
-                id: Date.now().toString(),
-                author: nameInput.value,
-                constructor: constInput.value,
-                text: msgInput.value,
-                timestamp: dateStr,
-                userId: currentUser.uid
-            };
-
-            const updatedPost = { ...post };
-            updatedPost.replies.push(newReply);
-
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()), updatedPost);
-                // Intentionally NOT toggling the form back to visible after submission updates the DOM
-            } catch (error) {
-                console.error("Error creating reply:", error);
-                alert("Failed to submit reply.");
-            }
-        };
-
-        window.deletePost = async function(postId) {
-            if (!currentUser) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()));
-            } catch(error) {
-                console.error("Error deleting post:", error);
-            }
-        };
-
-        window.deleteReply = async function(postId, replyId) {
-            if (!currentUser) return;
-            const post = posts.find(p => p.id === postId.toString());
-            if (!post) return;
-
-            const updatedPost = { ...post };
-            updatedPost.replies = updatedPost.replies.filter(r => r.id !== replyId.toString());
-
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, postId.toString()), updatedPost);
-            } catch (error) {
-                console.error("Error deleting reply:", error);
-            }
-        };
-
-    </script>
+        await refreshAll(); render();
+    }
+</script>
 </body>
 </html>
