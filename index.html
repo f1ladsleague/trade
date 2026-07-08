@@ -165,7 +165,6 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // LIVE budget caps — Constructors tab of F1 Lads MASTER sheet.
-    // Uses the gviz CSV endpoint (more CORS-friendly than /pub?output=csv).
     const SHEET_ID = "2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg";
     const CONSTRUCTORS_GID = "1589744882";
     const CONSTRUCTORS_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${CONSTRUCTORS_GID}&single=true&output=csv`;
@@ -401,10 +400,8 @@
         if(role==='Admin'){
             region.innerHTML = renderAdmin(phase); // Admin view already includes its own log
         } else if(role==='Driver'){
-            // Append shared Trade History unless the window is already closed (log shown there anyway)
             region.innerHTML = renderDriver(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
         } else {
-            // Constructor: 'complete' already renders the log inline; append for all other phases (incl. idle)
             region.innerHTML = renderConstructor(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
         }
     }
@@ -593,6 +590,13 @@
                 : `<p class="info-line">No nominations yet.</p>`;
             html+='</div>';
         }
+        if(phase==='settlement'){
+            html+=`<div class="section-box"><h3 style="color:var(--theme-color);">Sealed Bids — ${auctionState.target_driver}</h3>`;
+            const bids=allBidsForTarget(auctionState.target_driver).sort((a,b)=>b.cash_bid-a.cash_bid);
+            html+= bids.length? bids.map(b=>`<div class="bid-row"><div class="bid-info"><span class="bid-team">${b.constructor}</span><span class="bid-detail">+ ${b.offered_driver}</span></div><span class="bid-amount">$${b.cash_bid.toFixed(0)}</span></div>`).join('')
+                : `<p class="info-line">No bids.</p>`;
+            html+=`<p class="info-line">If the seller doesn't act, the driver auto-sells to the highest bidder.</p></div>`;
+        }
         html+=renderTradeLog("Trade History");
         return html;
     }
@@ -619,7 +623,8 @@
         <li>Fail to nominate = barred from all bidding this cycle.</li>
         <li>Bid ≤ seller's cap: seller may Match & Defend (pay to League, driver locked) or sell to highest bidder.</li>
         <li>Bid &gt; seller's cap: seller is priced out & must sell, choosing among bids above their cap.</li>
-        <li>Traded driver may Accept or Veto (pay tier fee). Either way they're LOCKED.</li></ul></details>`; }
+        <li>Traded driver may Accept or Veto (pay tier fee). Either way they're LOCKED.</li>
+        <li><strong>Timeouts:</strong> if you don't act in time, the trade goes through to the highest bidder.</li></ul></details>`; }
     function renderTradeLog(title){
         let html=`<div class="section-box"><h3 style="color:var(--theme-color);text-align:center;">${title}</h3>`;
         if(_tradeCache.length===0) html+=`<p class="info-line">No trades processed yet.</p>`;
@@ -733,24 +738,18 @@
     window.adminFullReset = async function(){
         if(!confirm("⚠️ FULL RESET\n\nThis deletes ALL nominations, bids, cap changes and trades, unlocks every driver, and restores original teams.\n\nContinue?")) return;
         if(!confirm("Are you absolutely sure? This cannot be undone.")) return;
-
-        const btnErr = (label,e)=>{ console.error(label,e); };
         try {
-            // 1. Clear the four data tables (delete-all via always-true filter on id)
             await supabaseClient.from('auction_nominations').delete().gte('id', 0);
             await supabaseClient.from('auction_bids').delete().gte('id', 0);
             await supabaseClient.from('auction_cap_ledger').delete().gte('id', 0);
             await supabaseClient.from('auction_trades').delete().gte('id', 0);
 
-            // 2. Restore every driver: current_team = original_team, unlocked
             await refreshAll();
             for(const d of liveDrivers){
                 await supabaseClient.from('auction_drivers')
                     .update({ current_team: d.original_team, locked: false, updated_at: new Date().toISOString() })
                     .eq('id', d.id);
             }
-
-            // 3. Reset the state row to a fresh pre-trade idle (round 1)
             await supabaseClient.from('auction_state').update({
                 is_active:false, round_no:1, phase:'idle',
                 target_driver:null, seller_team:null,
@@ -763,8 +762,8 @@
             render();
             alert("✅ Database reset. Everything is back to the pre-trade state.");
         } catch(e){
-            btnErr("Full reset failed:", e);
-            alert("⚠️ Reset hit an error — check the console. Some tables may need RLS delete policies.");
+            console.error("Full reset failed:", e);
+            alert("⚠️ Reset hit an error — check the console. The ledger/trades tables may need delete RLS policies.");
         }
     };
 
@@ -774,11 +773,12 @@
         try{
             await refreshAll();
             const p=auctionState.phase;
+
             if(p==='nominate'){
                 const tally=tallyNominations();
                 const keys=Object.keys(tally);
                 if(keys.length===0){
-                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null}).eq('id',auctionState.id);
+                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null,is_active:false}).eq('id',auctionState.id);
                     await refreshAll(); render(); return;
                 }
                 const max=Math.max(...keys.map(k=>tally[k]));
@@ -789,25 +789,25 @@
                     if(pick && leaders.includes(pick.trim())) target=pick.trim();
                 }
                 const seller=liveDrivers.find(d=>d.driver===target).current_team;
-                const deadline=new Date(Date.now()+NOMINATE_SECS*1000).toISOString();
+                const deadline=new Date(Date.now()+DECISION_SECS*1000).toISOString();
                 await supabaseClient.from('auction_state').update({phase:'bidding',target_driver:target,seller_team:seller,phase_deadline:deadline}).eq('id',auctionState.id);
             }
             else if(p==='bidding'){
                 const t=auctionState.target_driver;
                 const bids=allBidsForTarget(t);
                 if(bids.length===0){
-                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null}).eq('id',auctionState.id);
+                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null,is_active:false}).eq('id',auctionState.id);
                 } else {
                     const deadline=new Date(Date.now()+DECISION_SECS*1000).toISOString();
                     await supabaseClient.from('auction_state').update({phase:'settlement',phase_deadline:deadline}).eq('id',auctionState.id);
                 }
             }
             else if(p==='settlement'){
-                // Seller didn't decide in time -> DEFAULT: auto-sell to the HIGHEST bidder.
+                // DEFAULT (seller didn't act): AUTO-SELL to the HIGHEST bidder. No auto-defend.
                 const t=auctionState.target_driver;
                 const bids=allBidsForTarget(t);
                 if(bids.length===0){
-                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null}).eq('id',auctionState.id);
+                    await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null,is_active:false}).eq('id',auctionState.id);
                 } else {
                     const best=bids.sort((a,b)=>b.cash_bid-a.cash_bid)[0];
                     const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
@@ -815,6 +815,7 @@
                 }
             }
             else if(p==='veto'){
+                // DEFAULT (driver didn't act): AUTO-ACCEPT the trade.
                 const s=auctionState, t=s.target_driver;
                 await executeTrade(s.seller_team,s.winning_team,t,s.winning_swap,Number(s.winning_bid));
                 await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),driver_in:s.winning_swap,driver_out:t,outcome:'traded'}]);
