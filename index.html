@@ -51,6 +51,16 @@
         .cap-pill .lbl { color: var(--theme-color); font-weight: 700; text-transform: uppercase; font-size: 14px; }
         .cap-pill .val { font-family: monospace; font-size: 22px; font-weight: 900; }
 
+        /* LIVE CAPS BOARD */
+        .caps-title { text-transform: uppercase; color: #fff; font-size: 15px; letter-spacing: 1px; text-align: center; margin: 0 0 14px 0; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .caps-grid { display: flex; flex-direction: column; gap: 8px; }
+        .cap-card { display: flex; align-items: center; gap: 12px; background: #14141b; border: 1px solid #333; border-left: 5px solid var(--tc, #444); border-radius: 8px; padding: 11px 14px; transition: 0.2s; }
+        .cap-card:hover { background: #1c1c24; transform: translateX(3px); }
+        .cap-card img { height: 26px; width: 38px; object-fit: contain; flex-shrink: 0; }
+        .cap-card .tname { font-weight: 800; font-size: 14px; flex-grow: 1; text-transform: uppercase; letter-spacing: 0.5px; color: var(--tc, #fff); }
+        .cap-card .tval { font-family: monospace; font-weight: 900; font-size: 17px; color: #fff; }
+        .cap-card.me-highlight { box-shadow: 0 0 0 2px var(--tc); }
+
         .driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (max-width: 480px) { .driver-grid { grid-template-columns: 1fr; } }
 
@@ -98,6 +108,8 @@
         .trade-log-item .to { color: #888; font-size: 12px; }
 
         .admin-warn { background: rgba(255,68,68,0.1); border: 1px solid #ff4444; color: #ff8888; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; text-align: center; }
+        .fee-box { background: rgba(255,215,0,0.06); border: 1px solid rgba(255,215,0,0.4); border-radius: 8px; padding: 14px; text-align: center; margin-top: 10px; }
+        .fee-box .fee-val { font-family: monospace; font-size: 28px; font-weight: 900; color: #ffd700; }
     </style>
 </head>
 <body>
@@ -170,6 +182,8 @@
     const CONSTRUCTORS_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${CONSTRUCTORS_GID}&single=true&output=csv`;
 
     const NOMINATE_SECS = 120, DECISION_SECS = 120, VETO_SECS = 120;
+    const LEAGUE_FEE_RATE = 0.10;           // 10% league fee on completed trades
+    const LEAGUE_KEY = "__LEAGUE__";        // ledger marker for league fee revenue (never a real team)
 
     const ADMIN_PASSWORD = "f1ladsadmin";
 
@@ -203,7 +217,6 @@
         "Mercedes":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MER.png",
         "Red Bull":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/RB.png"
     };
-    // Fallback tier config if auction_drivers not seeded yet (no min bid per regs).
     const tierConfig = {
         "Mapa":{tier:"1",veto:100}, "Nuwie G":{tier:"1",veto:100},
         "Rodda":{tier:"1.5",veto:90}, "Sahan":{tier:"1.5",veto:90},
@@ -216,9 +229,11 @@
         if(t.includes("ferrari"))return"#ED1131"; if(t.includes("mclaren"))return"#F47600";
         if(t.includes("aston"))return"#229971"; return"#e10600"; }
     function applyTheme(t){ document.documentElement.style.setProperty('--theme-color', getTeamColor(t)); }
-
-    // Normalise team names so "Red Bull Racing" == "Red Bull" == "RedBull", etc.
     function normTeam(t){ return String(t||"").toLowerCase().replace(/racing|f1|team/g,"").replace(/[^a-z]/g,""); }
+
+    // Money helpers (2dp, cents-aware)
+    function round2(n){ return Math.round((Number(n)+Number.EPSILON)*100)/100; }
+    function money(n){ return "$" + Number(n||0).toFixed(2); }
 
     // =========================================================
     // SESSION STATE
@@ -253,11 +268,15 @@
         let neg=s.includes('-')||(s.includes('(')&&s.includes(')'));
         let n=parseFloat(s.replace(/[^0-9.]/g,"")); if(isNaN(n))return 0; return neg?-n:n; }
 
-    // Live cap = Sheet starting cap + SUM(ledger deltas), name-tolerant.
+    // Live cap = Sheet starting cap + SUM(ledger deltas) for that team.
     function liveCap(team){
         let base = sheetCapByTeam[normTeam(team)] || 0;
         capLedger.filter(l=>normTeam(l.constructor)===normTeam(team)).forEach(l=> base += Number(l.delta));
-        return base;
+        return round2(base);
+    }
+    // Total league trade fees accrued (admin-only).
+    function leagueFees(){
+        return round2(capLedger.filter(l=>l.constructor===LEAGUE_KEY).reduce((s,l)=>s+Number(l.delta),0));
     }
 
     function setLoginMode(mode){
@@ -273,7 +292,6 @@
     // INITIAL LOAD
     // =========================================================
     window.onload = async () => {
-        // 1. Supabase state (authoritative)
         try {
             await refreshAll();
             updateLoginStatus();
@@ -288,13 +306,11 @@
             console.error(e);
             document.getElementById('login-status').innerText = "Could not reach database — check Supabase keys / Realtime.";
         }
-        // 2. Live caps from Sheet (isolated, non-fatal)
         try {
             constructorsData = await fetchCSV(CONSTRUCTORS_CSV_URL);
             constructorsData.forEach(c=>{ const team=c[0]; if(!team)return;
                 sheetCapByTeam[normTeam(team)] = parseSheetNumber(c[6]); });
         } catch(e){ console.warn("Could not load caps from Sheet:", e); }
-        // 3. Dropdowns (Supabase-first, hardcoded fallback)
         populateLoginDropdowns();
     };
 
@@ -325,16 +341,19 @@
             : "Trade window not yet started by Admin.";
     }
 
+    function allTeams(){
+        let teams = (liveDrivers && liveDrivers.length) ? [...new Set(liveDrivers.map(d=>d.original_team))] : [];
+        if(!teams.length) teams = Object.keys(constructorPasswords);
+        return teams.sort();
+    }
+
     function populateLoginDropdowns(){
         const cSel=document.getElementById('constructor-select');
         const dSel=document.getElementById('driver-select');
         cSel.innerHTML='<option value="">Select your Team…</option>';
         dSel.innerHTML='<option value="">Select your Driver…</option>';
-        let teams = (liveDrivers && liveDrivers.length) ? [...new Set(liveDrivers.map(d=>d.original_team))].sort() : [];
-        if(!teams.length) teams = Object.keys(constructorPasswords);
-        teams.forEach(t=> cSel.innerHTML += `<option value="${t}">${t}</option>`);
-        let drivers = (liveDrivers && liveDrivers.length) ? liveDrivers.map(d=>d.driver) : [];
-        if(!drivers.length) drivers = Object.keys(driverPasswords);
+        allTeams().forEach(t=> cSel.innerHTML += `<option value="${t}">${t}</option>`);
+        let drivers = (liveDrivers && liveDrivers.length) ? liveDrivers.map(d=>d.driver) : Object.keys(driverPasswords);
         drivers.forEach(d=> dSel.innerHTML += `<option value="${d}">${d}</option>`);
     }
 
@@ -393,16 +412,16 @@
 
         const capPill=document.getElementById('cap-pill');
         if(role==='Constructor'){ capPill.style.display='flex';
-            document.getElementById('cap-value').innerText = `$${liveCap(me).toFixed(2)}`; }
+            document.getElementById('cap-value').innerText = money(liveCap(me)); }
         else capPill.style.display='none';
 
         const region=document.getElementById('content-region');
         if(role==='Admin'){
-            region.innerHTML = renderAdmin(phase); // Admin view already includes its own log
+            region.innerHTML = renderAdmin(phase);
         } else if(role==='Driver'){
-            region.innerHTML = renderDriver(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
+            region.innerHTML = capsBoardHtml() + renderDriver(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
         } else {
-            region.innerHTML = renderConstructor(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
+            region.innerHTML = capsBoardHtml() + renderConstructor(phase) + (phase==='complete' ? '' : renderTradeLog("Trade History"));
         }
     }
 
@@ -410,6 +429,23 @@
         idle:"Awaiting Start", nominate:"Silent Nomination", bidding:"Final Bidding",
         settlement:"Trade Settlement", veto:"Driver Veto", complete:"Trade Window Closed"
     }[p] || p; }
+
+    // =========================================================
+    // LIVE CAPS BOARD (colours + logos)
+    // =========================================================
+    function capsBoardHtml(){
+        let html='<div class="section-box"><div class="caps-title">💰 Live Budget Caps</div><div class="caps-grid">';
+        allTeams().forEach(t=>{
+            const c=getTeamColor(t);
+            const mineCls = (role==='Constructor' && t===me) ? ' me-highlight' : '';
+            html+=`<div class="cap-card${mineCls}" style="--tc:${c}">
+                <img src="${teamLogos[t]||''}" alt="${t}">
+                <span class="tname">${t}</span>
+                <span class="tval">${money(liveCap(t))}</span>
+            </div>`;
+        });
+        return html+'</div></div>';
+    }
 
     // =========================================================
     // DRIVER LINE-UP GRID
@@ -454,7 +490,7 @@
             if(already){
                 return `<div class="section-box"><div class="status-msg"><span class="big-icon">✅</span>
                     Your nomination is locked in for this round:<br><br>
-                    <strong>${already.target_driver}</strong> — Bid $${Number(already.cash_bid).toFixed(0)} + ${already.offered_driver}
+                    <strong>${already.target_driver}</strong> — Bid ${money(already.cash_bid)} + ${already.offered_driver}
                     <br><br><span class="info-line">Waiting for other constructors & the timer…</span></div></div>`;
             }
             return `
@@ -464,8 +500,8 @@
                 <p class="info-line">Pick ONE un-locked driver you don't own. Your nomination is silent.</p>
                 ${driverGridHtml({selectable:true, selectedName:_selectedTarget, excludeTeam:true})}
                 <div style="margin-top:16px;">
-                    <label style="font-size:13px;color:#aaa;">Cash Bid (max $${liveCap(me).toFixed(0)})</label>
-                    <input type="number" id="nom-cash" placeholder="Enter cash amount" min="0" max="${liveCap(me).toFixed(0)}">
+                    <label style="font-size:13px;color:#aaa;">Cash Bid (max ${money(liveCap(me))}) — cents allowed</label>
+                    <input type="number" id="nom-cash" placeholder="e.g. 100.01" min="0" step="0.01" max="${liveCap(me)}">
                     <label style="font-size:13px;color:#aaa;">Driver from your team to offer in swap</label>
                     <select id="nom-swap"><option value="">Select your driver…</option>
                         ${myDrivers.map(d=>`<option value="${d.driver}">${d.driver} (Tier ${(tierConfig[d.driver]||{}).tier})</option>`).join('')}
@@ -485,14 +521,14 @@
             if(iAmSeller) return statusMsg("🛡️",`You own <strong>${t}</strong>. Sit tight — sealed bids are coming in. You'll get to decide once bidding closes.`);
             if(!iNominated) return statusMsg("🚫","You didn't nominate this round, so you're barred from bidding in this cycle.");
             if(iNominatedTarget) return statusMsg("🔒",`Your original nomination for <strong>${t}</strong> is locked and counts as your bid. Waiting for the timer…`);
-            if(alreadyBid) return statusMsg("✅",`Your final bid on <strong>${t}</strong> is locked: $${Number(alreadyBid.cash_bid).toFixed(0)} + ${alreadyBid.offered_driver}.`);
+            if(alreadyBid) return statusMsg("✅",`Your final bid on <strong>${t}</strong> is locked: ${money(alreadyBid.cash_bid)} + ${alreadyBid.offered_driver}.`);
 
             const myDrivers=liveDrivers.filter(d=>d.current_team===me && !d.locked);
             return `<div class="section-box">
                 <h1 style="font-size:18px;color:var(--theme-color);text-align:center;">Final Bid — Target: ${t}</h1>
                 <p class="info-line">You nominated another driver but participated, so you may place ONE sealed bid here.</p>
-                <label style="font-size:13px;color:#aaa;">Cash Bid (max $${liveCap(me).toFixed(0)})</label>
-                <input type="number" id="bid-cash" placeholder="Enter cash amount" min="0" max="${liveCap(me).toFixed(0)}">
+                <label style="font-size:13px;color:#aaa;">Cash Bid (max ${money(liveCap(me))}) — cents allowed</label>
+                <input type="number" id="bid-cash" placeholder="e.g. 100.01" min="0" step="0.01" max="${liveCap(me)}">
                 <label style="font-size:13px;color:#aaa;">Driver to offer in swap</label>
                 <select id="bid-swap"><option value="">Select your driver…</option>
                     ${myDrivers.map(d=>`<option value="${d.driver}">${d.driver}</option>`).join('')}
@@ -512,31 +548,39 @@
         return "";
     }
 
+    // Seller decision — enforces "must sell to HIGHEST if within cap; choose among above-cap bids if priced out"
     function renderSellerDecision(t){
         const bids=allBidsForTarget(t);
         if(bids.length===0) return statusMsg("🤷","No valid bids were received for this driver. The round will reset.");
         const rofr=liveCap(me);
-        const topBid=Math.max(...bids.map(b=>b.cash_bid));
+        const sorted=[...bids].sort((a,b)=>b.cash_bid-a.cash_bid);
+        const topBid=sorted[0].cash_bid;
+        const pricedOut = topBid>rofr;   // cannot exercise ROFR
+
         let html=`<div class="section-box"><h1 style="font-size:18px;color:var(--theme-color);text-align:center;">Settle ${t}</h1>
-            <p class="info-line">Your ROFR Amount (live cap) = $${rofr.toFixed(0)}. Highest bid = $${topBid.toFixed(0)}.</p><div style="margin:12px 0;">`;
-        bids.sort((a,b)=>b.cash_bid-a.cash_bid).forEach(b=>{
+            <p class="info-line">Your ROFR Amount (live cap) = ${money(rofr)}. Highest bid = ${money(topBid)}.</p><div style="margin:12px 0;">`;
+
+        sorted.forEach(b=>{
             const isAbove=b.cash_bid>rofr;
+            // Case (within cap): only the HIGHEST bid may be sold to. Case (priced out): only bids ABOVE cap.
+            const sellable = pricedOut ? isAbove : (b.cash_bid===topBid);
             html+=`<div class="bid-row ${isAbove?'above':'below'}">
                 <div class="bid-info"><span class="bid-team">${b.constructor}</span>
-                    <span class="bid-detail">Package: $${b.cash_bid.toFixed(0)} + ${b.offered_driver}</span></div>
+                    <span class="bid-detail">Package: ${money(b.cash_bid)} + ${b.offered_driver}</span></div>
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <span class="bid-amount">$${b.cash_bid.toFixed(0)}</span>
-                    ${(topBid<=rofr || isAbove)?`<button class="choose-btn" onclick="acceptSale('${b.constructor}',${b.cash_bid},'${b.offered_driver}')">Sell</button>`:''}
+                    <span class="bid-amount">${money(b.cash_bid)}</span>
+                    ${sellable?`<button class="choose-btn" onclick="acceptSale('${b.constructor}',${b.cash_bid},'${b.offered_driver}')">Sell</button>`:''}
                 </div></div>`;
         });
         html+='</div>';
-        if(topBid<=rofr){
-            html+=`<div class="option-box"><h3>Option A — Match & Defend</h3>
-                <p>Pay the top bid ($${topBid.toFixed(0)}) to the League, keep ${t}. Your cap drops by $${topBid.toFixed(0)} and ${t} becomes LOCKED.</p>
-                <button class="btn-primary" onclick="matchDefend(${topBid})">Match & Defend ($${topBid.toFixed(0)})</button></div>
-                <p class="info-line">…or choose a bidder above for a Voluntary Sale (must sell to highest bidder).</p>`;
+
+        if(!pricedOut){
+            html+=`<div class="option-box"><h3>Option A — Match &amp; Defend (ROFR)</h3>
+                <p>Pay the top bid (${money(topBid)}) to the League, keep ${t}. Your cap drops by ${money(topBid)} and ${t} becomes LOCKED.</p>
+                <button class="btn-primary" onclick="matchDefend(${topBid})">Match &amp; Defend (${money(topBid)})</button></div>
+                <p class="info-line">…or hit “Sell” to make a Voluntary Sale. You may only sell to the <strong>highest</strong> bidder (${sorted[0].constructor} — ${money(topBid)}).</p>`;
         } else {
-            html+=`<div class="admin-warn">You are priced out (top bid exceeds your cap). You MUST sell — choose any bidder who bid above your ROFR ($${rofr.toFixed(0)}).</div>`;
+            html+=`<div class="admin-warn">You are PRICED OUT — the top bid exceeds your cap, so you cannot exercise ROFR and MUST sell. You may choose any bidder who bid <strong>above</strong> your ROFR (${money(rofr)}).</div>`;
         }
         return html+'</div>';
     }
@@ -549,7 +593,7 @@
         if(phase==='veto' && auctionState.target_driver===me && auctionState.winning_team){
             const cfg=tierConfig[me]||{veto:meDrv?meDrv.veto_fee:0};
             return `<div class="section-box"><h1 style="font-size:18px;color:var(--theme-color);text-align:center;">You've Been Traded!</h1>
-                <p class="info-line">${auctionState.seller_team} → <strong>${auctionState.winning_team}</strong> for $${Number(auctionState.winning_bid).toFixed(0)} (swap: ${auctionState.winning_swap}).</p>
+                <p class="info-line">${auctionState.seller_team} → <strong>${auctionState.winning_team}</strong> for ${money(auctionState.winning_bid)} (swap: ${auctionState.winning_swap}).</p>
                 <div class="option-box"><h3>Accept the Trade</h3><p>You join ${auctionState.winning_team}. You'll be LOCKED for the rest of the window.</p>
                     <button class="btn-primary" onclick="driverAccept()">Accept Trade</button></div>
                 <div class="option-box" style="border-color:#ff4444;"><h3>Veto (pay $${cfg.veto})</h3>
@@ -576,12 +620,20 @@
                    <button class="btn-primary" style="background:#555;" onclick="autoAdvance()">⏭ Force Advance Phase</button>
                    <button class="btn-primary" style="background:#ff4444;margin-top:10px;" onclick="adminCancelRound()">✖ Cancel / Reset This Round</button>`;
         }
-        // FULL RESET — wipes all trade data & restores original roster (for testing)
         html+=`<div style="margin-top:18px;padding-top:16px;border-top:1px dashed #444;">
                    <button class="btn-primary" style="background:#8b0000;" onclick="adminFullReset()">🗑️ RESET EVERYTHING (Wipe Database)</button>
                    <p class="info-line" style="margin-top:8px;">Deletes all nominations, bids, cap changes & trades, unlocks every driver, and restores original teams.</p>
                </div>`;
         html+='</div>';
+
+        // League fee tally (ADMIN ONLY)
+        html+=`<div class="section-box"><h3 style="color:#ffd700;text-align:center;margin-top:0;">🏦 League Trade Fees (Admin Only)</h3>
+            <div class="fee-box"><div class="phase-label">Total Accrued</div><div class="fee-val">${money(leagueFees())}</div></div>
+            <p class="info-line">10% of every completed trade + full ROFR match amounts. Not visible to teams.</p></div>`;
+
+        // Live caps board
+        html+=capsBoardHtml();
+
         if(phase==='nominate'){
             const tally=tallyNominations();
             html+=`<div class="section-box"><h3 style="color:var(--theme-color);">Live Nomination Tally</h3>`;
@@ -593,7 +645,7 @@
         if(phase==='settlement'){
             html+=`<div class="section-box"><h3 style="color:var(--theme-color);">Sealed Bids — ${auctionState.target_driver}</h3>`;
             const bids=allBidsForTarget(auctionState.target_driver).sort((a,b)=>b.cash_bid-a.cash_bid);
-            html+= bids.length? bids.map(b=>`<div class="bid-row"><div class="bid-info"><span class="bid-team">${b.constructor}</span><span class="bid-detail">+ ${b.offered_driver}</span></div><span class="bid-amount">$${b.cash_bid.toFixed(0)}</span></div>`).join('')
+            html+= bids.length? bids.map(b=>`<div class="bid-row"><div class="bid-info"><span class="bid-team">${b.constructor}</span><span class="bid-detail">+ ${b.offered_driver}</span></div><span class="bid-amount">${money(b.cash_bid)}</span></div>`).join('')
                 : `<p class="info-line">No bids.</p>`;
             html+=`<p class="info-line">If the seller doesn't act, the driver auto-sells to the highest bidder.</p></div>`;
         }
@@ -618,11 +670,12 @@
     }
     function statusMsg(icon,txt){ return `<div class="section-box"><div class="status-msg"><span class="big-icon">${icon}</span>${txt}</div></div>`; }
     function rulesBox(){ return `<details class="rules-accordion"><summary style="color:var(--theme-color);">Trade Rules</summary><ul>
-        <li>Submit exactly ONE silent nomination: an un-locked driver you don't own + cash bid + one of your own drivers to swap.</li>
+        <li>Submit exactly ONE silent nomination: an un-locked driver you don't own + cash bid (cents allowed) + one of your own drivers to swap.</li>
         <li>Most-nominated driver is auctioned first (ties: championship points → tier → Admin draw).</li>
         <li>Fail to nominate = barred from all bidding this cycle.</li>
-        <li>Bid ≤ seller's cap: seller may Match & Defend (pay to League, driver locked) or sell to highest bidder.</li>
-        <li>Bid &gt; seller's cap: seller is priced out & must sell, choosing among bids above their cap.</li>
+        <li>Bid within seller's cap: seller must sell to the <strong>highest</strong> bidder OR Match &amp; Defend (pay to League, driver locked).</li>
+        <li>Bid above seller's cap: seller is priced out & must sell, choosing among bids above their cap.</li>
+        <li>A 10% League fee applies to every completed trade (seller receives 90% of the bid).</li>
         <li>Traded driver may Accept or Veto (pay tier fee). Either way they're LOCKED.</li>
         <li><strong>Timeouts:</strong> if you don't act in time, the trade goes through to the highest bidder.</li></ul></details>`; }
     function renderTradeLog(title){
@@ -630,8 +683,8 @@
         if(_tradeCache.length===0) html+=`<p class="info-line">No trades processed yet.</p>`;
         _tradeCache.slice().reverse().forEach(tr=>{
             let line='';
-            if(tr.outcome==='traded') line=`<strong>${tr.driver_out}</strong> → ${tr.buyer_team} for $${Number(tr.cash_amount).toFixed(0)} (swap in: ${tr.driver_in})`;
-            else if(tr.outcome==='rofr_defended') line=`${tr.seller_team} defended <strong>${tr.driver_out}</strong> (paid $${Number(tr.cash_amount).toFixed(0)})`;
+            if(tr.outcome==='traded') line=`<strong>${tr.driver_out}</strong> → ${tr.buyer_team} for ${money(tr.cash_amount)} (swap in: ${tr.driver_in})`;
+            else if(tr.outcome==='rofr_defended') line=`${tr.seller_team} defended <strong>${tr.driver_out}</strong> (paid ${money(tr.cash_amount)})`;
             else if(tr.outcome==='vetoed') line=`<strong>${tr.driver_out}</strong> VETOED the trade (fee $${Number(tr.veto_fee_paid).toFixed(0)})`;
             html+=`<div class="trade-log-item">${line}<div class="to">Round ${tr.round_no}</div></div>`;
         });
@@ -642,7 +695,7 @@
     // ACTION HANDLERS
     // =========================================================
     window.submitNomination = async function(){
-        const cash=parseFloat(document.getElementById('nom-cash').value)||0;
+        const cash=round2(parseFloat(document.getElementById('nom-cash').value)||0);
         const swap=document.getElementById('nom-swap').value;
         if(!_selectedTarget){ alert("Select a driver to target."); return; }
         if(!swap){ alert("Choose one of your own drivers to offer."); return; }
@@ -655,7 +708,7 @@
     };
 
     window.submitBid = async function(){
-        const cash=parseFloat(document.getElementById('bid-cash').value)||0;
+        const cash=round2(parseFloat(document.getElementById('bid-cash').value)||0);
         const swap=document.getElementById('bid-swap').value;
         const t=auctionState.target_driver;
         if(!swap){ alert("Choose a driver to offer."); return; }
@@ -667,10 +720,15 @@
         await refreshAll(); render();
     };
 
+    // Match & Defend: seller pays FULL top bid to League, driver LOCKED, no move.
     window.matchDefend = async function(topBid){
         const t=auctionState.target_driver;
-        if(!confirm(`Match $${topBid} to keep ${t}? Your cap drops by $${topBid} and ${t} locks.`)) return;
-        await supabaseClient.from('auction_cap_ledger').insert([{round_no:auctionState.round_no,constructor:me,delta:-topBid,reason:'rofr_defend'}]);
+        topBid=round2(topBid);
+        if(!confirm(`Match ${money(topBid)} to keep ${t}? Your cap drops by ${money(topBid)} (all to the League) and ${t} locks.`)) return;
+        await supabaseClient.from('auction_cap_ledger').insert([
+            {round_no:auctionState.round_no,constructor:me,delta:-topBid,reason:'rofr_defend'},
+            {round_no:auctionState.round_no,constructor:LEAGUE_KEY,delta:topBid,reason:'fee'}
+        ]);
         await supabaseClient.from('auction_drivers').update({locked:true,updated_at:new Date().toISOString()}).eq('driver',t);
         await supabaseClient.from('auction_trades').insert([{round_no:auctionState.round_no,target_driver:t,seller_team:me,cash_amount:topBid,driver_out:t,outcome:'rofr_defended'}]);
         await advanceToNextOrEnd();
@@ -678,7 +736,8 @@
 
     window.acceptSale = async function(buyer,cash,swap){
         const t=auctionState.target_driver;
-        if(!confirm(`Sell ${t} to ${buyer} for $${cash} (receiving ${swap})?`)) return;
+        cash=round2(cash);
+        if(!confirm(`Sell ${t} to ${buyer} for ${money(cash)} (you receive ${money(round2(cash-round2(cash*LEAGUE_FEE_RATE)))} after 10% League fee, and get ${swap})?`)) return;
         const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
         await supabaseClient.from('auction_state').update({
             phase:'veto', winning_team:buyer, winning_bid:cash, winning_swap:swap, phase_deadline:deadline
@@ -700,10 +759,16 @@
         await advanceToNextOrEnd();
     };
 
+    // Core swap with 10% League fee:
+    //   buyer cap -= cash ; seller cap += (cash - 10% fee) ; League += 10% fee
     async function executeTrade(seller,buyer,target,swapDriver,cash){
+        cash=round2(cash);
+        const fee=round2(cash*LEAGUE_FEE_RATE);
+        const toSeller=round2(cash-fee);
         await supabaseClient.from('auction_cap_ledger').insert([
-            {round_no:auctionState.round_no,constructor:buyer,delta:-cash,reason:'buy'},
-            {round_no:auctionState.round_no,constructor:seller,delta:cash,reason:'sell'}
+            {round_no:auctionState.round_no,constructor:buyer, delta:-cash,     reason:'buy'},
+            {round_no:auctionState.round_no,constructor:seller,delta: toSeller, reason:'sell'},
+            {round_no:auctionState.round_no,constructor:LEAGUE_KEY,delta: fee,   reason:'fee'}
         ]);
         await supabaseClient.from('auction_drivers').update({current_team:buyer,locked:true,updated_at:new Date().toISOString()}).eq('driver',target);
         await supabaseClient.from('auction_drivers').update({current_team:seller,updated_at:new Date().toISOString()}).eq('driver',swapDriver);
@@ -734,7 +799,6 @@
         await refreshAll(); render();
     };
 
-    // FULL RESET — wipe all trade tables & restore roster to pre-trade state
     window.adminFullReset = async function(){
         if(!confirm("⚠️ FULL RESET\n\nThis deletes ALL nominations, bids, cap changes and trades, unlocks every driver, and restores original teams.\n\nContinue?")) return;
         if(!confirm("Are you absolutely sure? This cannot be undone.")) return;
@@ -743,7 +807,6 @@
             await supabaseClient.from('auction_bids').delete().gte('id', 0);
             await supabaseClient.from('auction_cap_ledger').delete().gte('id', 0);
             await supabaseClient.from('auction_trades').delete().gte('id', 0);
-
             await refreshAll();
             for(const d of liveDrivers){
                 await supabaseClient.from('auction_drivers')
@@ -756,7 +819,6 @@
                 winning_team:null, winning_bid:null, winning_swap:null,
                 phase_deadline:null, updated_at:new Date().toISOString()
             }).eq('id', auctionState.id);
-
             await refreshAll();
             populateLoginDropdowns();
             render();
