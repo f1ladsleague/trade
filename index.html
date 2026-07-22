@@ -187,6 +187,33 @@
 
     const ADMIN_PASSWORD = "f1ladsadmin";
 
+        // ===== Server-time sync + submission grace =====
+    let serverOffset = 0;          // (server clock) - (this device clock), in ms
+    const GRACE_MS = 2500;         // accept last-second inserts for 2.5s past the deadline
+
+    async function syncServerTime(){
+        try {
+            const t0 = Date.now();
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                method: 'HEAD',
+                headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+                cache: 'no-store'
+            });
+            const t1 = Date.now();
+            const dateHdr = res.headers.get('date');
+            if (dateHdr) {
+                // Header is floored to the second → assume ~500ms in, minus half the round-trip.
+                const est = new Date(dateHdr).getTime() + 500 - (t1 - t0) / 2;
+                serverOffset = est - t1;
+            }
+        } catch (e) { console.warn('Server time sync failed; falling back to local clock.', e); }
+    }
+    function serverNow(){ return Date.now() + serverOffset; }
+    function withinWindow(){
+        if (!auctionState || !auctionState.phase_deadline) return false;
+        return serverNow() <= new Date(auctionState.phase_deadline).getTime() + GRACE_MS;
+    }
+
     // ---- Login credentials ----
     const constructorPasswords = {
         "Ferrari":"forzaferrari", "Aston Martin":"Mapasunkredbull",
@@ -292,6 +319,14 @@
     // INITIAL LOAD
     // =========================================================
     window.onload = async () => {
+        await syncServerTime();                       
+        setInterval(syncServerTime, 30000);          
+        document.addEventListener('visibilitychange', async ()=>{  
+            if(document.visibilityState==='visible'){
+                await syncServerTime(); await refreshAll();
+                if(!document.getElementById('app-section').classList.contains('hidden')) render();
+            }
+        });
         try {
             await refreshAll();
             updateLoginStatus();
@@ -392,13 +427,20 @@
         const el=document.getElementById('countdown');
         const tick=()=>{
             if(!auctionState || !auctionState.phase_deadline){ el.innerText="--:--"; el.classList.remove('urgent'); return; }
-            const diff=new Date(auctionState.phase_deadline).getTime()-Date.now();
-            if(diff<=0){ el.innerText="00:00"; el.classList.add('urgent'); if(role==='Admin') autoAdvance(); return; }
+            const diff=new Date(auctionState.phase_deadline).getTime() - serverNow();   // server-synced
+            if(diff<=0){
+                el.innerText="00:00";
+                el.classList.add('urgent');
+                // Only the admin drives the engine, and ONLY after the grace window,
+                // so genuine last-second submissions are still counted.
+                if(role==='Admin' && diff <= -GRACE_MS) autoAdvance();
+                return;
+            }
             const m=Math.floor(diff/60000), s=Math.floor((diff%60000)/1000);
             el.innerText=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
             el.classList.toggle('urgent', diff<30000);
         };
-        tick(); countdownTimer=setInterval(tick,1000);
+        tick(); countdownTimer=setInterval(tick,250);   // 250ms → snaps back instantly after tab throttling
     }
 
     // =========================================================
@@ -700,6 +742,11 @@
         if(!_selectedTarget){ alert("Select a driver to target."); return; }
         if(!swap){ alert("Choose one of your own drivers to offer."); return; }
         if(cash>liveCap(me)){ alert("Bid exceeds your budget cap."); return; }
+
+        await refreshAll();                                     // re-check latest server state
+        if(auctionState.phase!=='nominate' || !withinWindow()){
+            alert("The nomination window has just closed — your entry was not accepted."); render(); return;
+        }
         const {error}=await supabaseClient.from('auction_nominations').insert([{
             round_no:auctionState.round_no, constructor:me,
             target_driver:_selectedTarget, cash_bid:cash, offered_driver:swap }]);
@@ -710,9 +757,14 @@
     window.submitBid = async function(){
         const cash=round2(parseFloat(document.getElementById('bid-cash').value)||0);
         const swap=document.getElementById('bid-swap').value;
-        const t=auctionState.target_driver;
         if(!swap){ alert("Choose a driver to offer."); return; }
         if(cash>liveCap(me)){ alert("Bid exceeds your budget cap."); return; }
+
+        await refreshAll();                                     // re-check latest server state
+        if(auctionState.phase!=='bidding' || !withinWindow()){
+            alert("The bidding window has just closed — your bid was not accepted."); render(); return;
+        }
+        const t=auctionState.target_driver;
         const {error}=await supabaseClient.from('auction_bids').insert([{
             round_no:auctionState.round_no, target_driver:t, constructor:me,
             cash_bid:cash, offered_driver:swap }]);
@@ -722,6 +774,7 @@
 
     // Match & Defend: seller pays FULL top bid to League, driver LOCKED, no move.
     window.matchDefend = async function(topBid){
+        await refreshAll(); if(auctionState.phase!=='settlement'){ render(); return; }
         const t=auctionState.target_driver;
         topBid=round2(topBid);
         if(!confirm(`Match ${money(topBid)} to keep ${t}? Your cap drops by ${money(topBid)} (all to the League) and ${t} locks.`)) return;
@@ -735,10 +788,11 @@
     };
 
     window.acceptSale = async function(buyer,cash,swap){
+        await refreshAll(); if(auctionState.phase!=='settlement'){ render(); return; }
         const t=auctionState.target_driver;
         cash=round2(cash);
         if(!confirm(`Sell ${t} to ${buyer} for ${money(cash)} (you receive ${money(round2(cash-round2(cash*LEAGUE_FEE_RATE)))} after 10% League fee, and get ${swap})?`)) return;
-        const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
+        const deadline=new Date(serverNow()+VETO_SECS*1000).toISOString();
         await supabaseClient.from('auction_state').update({
             phase:'veto', winning_team:buyer, winning_bid:cash, winning_swap:swap, phase_deadline:deadline
         }).eq('id',auctionState.id);
@@ -746,6 +800,7 @@
     };
 
     window.driverAccept = async function(){
+        await refreshAll(); if(auctionState.phase!=='veto'){ render(); return; }
         const s=auctionState, t=s.target_driver;
         await executeTrade(s.seller_team, s.winning_team, t, s.winning_swap, Number(s.winning_bid));
         await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),driver_in:s.winning_swap,driver_out:t,outcome:'traded'}]);
@@ -753,6 +808,7 @@
     };
 
     window.driverVeto = async function(fee){
+        await refreshAll(); if(auctionState.phase!=='veto'){ render(); return; }
         const s=auctionState, t=s.target_driver;
         await supabaseClient.from('auction_drivers').update({locked:true,updated_at:new Date().toISOString()}).eq('driver',t);
         await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),outcome:'vetoed',veto_fee_paid:fee,driver_out:t}]);
@@ -779,7 +835,7 @@
     // =========================================================
     window.adminStartRound = async function(){
         const roundNo = (_tradeCache.length===0) ? (auctionState.round_no||1) : (auctionState.round_no+1);
-        const deadline=new Date(Date.now()+NOMINATE_SECS*1000).toISOString();
+        const deadline=new Date(serverNow()+NOMINATE_SECS*1000).toISOString();
         await supabaseClient.from('auction_state').update({
             is_active:true, round_no:roundNo, phase:'nominate',
             target_driver:null, seller_team:null, winning_team:null, winning_bid:null, winning_swap:null,
@@ -851,7 +907,7 @@
                     if(pick && leaders.includes(pick.trim())) target=pick.trim();
                 }
                 const seller=liveDrivers.find(d=>d.driver===target).current_team;
-                const deadline=new Date(Date.now()+DECISION_SECS*1000).toISOString();
+                const deadline=new Date(serverNow()+DECISION_SECS*1000).toISOString();
                 await supabaseClient.from('auction_state').update({phase:'bidding',target_driver:target,seller_team:seller,phase_deadline:deadline}).eq('id',auctionState.id);
             }
             else if(p==='bidding'){
@@ -860,7 +916,7 @@
                 if(bids.length===0){
                     await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null,is_active:false}).eq('id',auctionState.id);
                 } else {
-                    const deadline=new Date(Date.now()+DECISION_SECS*1000).toISOString();
+                    const deadline=new Date(serverNow()+DECISION_SECS*1000).toISOString();
                     await supabaseClient.from('auction_state').update({phase:'settlement',phase_deadline:deadline}).eq('id',auctionState.id);
                 }
             }
@@ -872,7 +928,7 @@
                     await supabaseClient.from('auction_state').update({phase:'idle',phase_deadline:null,is_active:false}).eq('id',auctionState.id);
                 } else {
                     const best=bids.sort((a,b)=>b.cash_bid-a.cash_bid)[0];
-                    const deadline=new Date(Date.now()+VETO_SECS*1000).toISOString();
+                    const deadline=new Date(serverNow()+VETO_SECS*1000).toISOString();
                     await supabaseClient.from('auction_state').update({phase:'veto',winning_team:best.constructor,winning_bid:best.cash_bid,winning_swap:best.offered_driver,phase_deadline:deadline}).eq('id',auctionState.id);
                 }
             }
