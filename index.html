@@ -251,6 +251,25 @@
         "Shiyan":{tier:"3",veto:30}, "Eranga":{tier:"3",veto:30}, "Nippa E":{tier:"3",veto:30}
     };
 
+        // ===== Driver photo system (Supabase Storage) =====
+    const PHOTO_BASE = `${SUPABASE_URL}/storage/v1/object/public/driver-photos`;
+
+    const driverCode = {
+        "Shiyan":"SHI", "Mapa":"MAP", "Rodda":"ROD", "Nuwie G":"NUW", "Kalpa":"KAL",
+        "Sameera":"SAM", "Nippa E":"NIP", "Shahan":"SHA", "Eranga":"ERA", "Sahan":"SAH"
+    };
+    const teamCode = {
+        "McLaren":"MCL", "Red Bull":"RB", "Ferrari":"FER", "Mercedes":"MER", "Aston Martin":"AM"
+    };
+
+    // Build the correct team-coloured photo URL for a driver on a given team.
+    function driverPhoto(driverName, teamName){
+        const dc = driverCode[driverName];
+        const tc = teamCode[teamName];
+        if(dc && tc) return `${PHOTO_BASE}/${dc}-${tc}.png`;
+        return driverImages[driverName] || '';   // fallback to old headshot if anything is missing
+    }
+
     function getTeamColor(t){ t=(t||"").toLowerCase();
         if(t.includes("mercedes"))return"#00D7B6"; if(t.includes("red bull"))return"#4781D7";
         if(t.includes("ferrari"))return"#ED1131"; if(t.includes("mclaren"))return"#F47600";
@@ -507,7 +526,7 @@
                 ? `onclick="selectTarget('${d.driver.replace(/'/g,"")}')"` : '';
             const corner = locked ? `<span class="lock-tag">Locked</span>` : '';
             html+=`<div class="${cls}" ${onclick}>
-                <div class="avatar-wrapper"><img class="driver-avatar" src="${driverImages[d.driver]||''}" alt="${d.driver}"></div>
+                <div class="avatar-wrapper"><img class="driver-avatar" src="${driverPhoto(d.driver, d.current_team)}" alt="${d.driver}"></div>
                 <div class="driver-meta">
                     <span class="driver-name">${d.driver}</span>
                     <span class="driver-team"><img src="${teamLogos[d.current_team]||''}">${d.current_team}</span>
