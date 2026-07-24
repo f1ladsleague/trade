@@ -50,6 +50,29 @@
   .vrow .pbar{flex:1;height:8px;background:#14141b;border-radius:4px;overflow:hidden;}
   .vrow .pbar>span{display:block;height:100%;background:#4781D7;border-radius:4px;}
   .up{color:#3fe0a0;} .down{color:#ff6b6b;}
+
+  /* ===== How It Works explainer ===== */
+  .explain{margin-top:8px;}
+  .explain summary{cursor:pointer;list-style:none;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#fff;padding:4px 0;}
+  .explain summary::-webkit-details-marker{display:none;}
+  .explain summary::before{content:"▸ ";color:var(--red);}
+  .explain[open] summary::before{content:"▾ ";}
+  .core-idea{background:linear-gradient(135deg,rgba(225,6,0,.15),rgba(225,6,0,.02));border:1px solid var(--red);border-radius:10px;padding:16px 18px;text-align:center;font-size:18px;font-weight:700;margin:14px 0 20px;}
+  .core-idea .mult{color:#ffd700;}
+  .ing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+  @media(max-width:760px){.ing-grid{grid-template-columns:1fr;}}
+  .ing{background:#14141b;border:1px solid #333;border-radius:10px;padding:16px;border-top:3px solid var(--red);}
+  .ing h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:#fff;}
+  .ing p{margin:0 0 8px;font-size:13px;color:#ccc;line-height:1.5;}
+  .ing ul{margin:6px 0 0;padding-left:18px;font-size:12px;color:#aaa;line-height:1.6;}
+  .rails{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+  .rail{flex:1;min-width:220px;background:#14141b;border:1px solid #333;border-radius:10px;padding:14px 16px;}
+  .rail b{color:#ffd700;text-transform:uppercase;font-size:12px;letter-spacing:.5px;}
+  .rail p{margin:6px 0 0;font-size:13px;color:#ccc;line-height:1.5;}
+  .practice{list-style:none;padding:0;margin:0 0 18px;}
+  .practice li{background:#14141b;border-left:3px solid var(--red);border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#ddd;}
+  .practice li b{color:#fff;}
+  .one-line{background:var(--hover);border-radius:10px;padding:16px 18px;font-size:15px;font-style:italic;color:#fff;line-height:1.6;border:1px dashed #555;}
 </style>
 </head>
 <body>
@@ -122,6 +145,57 @@
         </table>
       </div>
     </div>
+  </div>
+
+  <div class="panel">
+    <details class="explain" open>
+      <summary>🏁 How the Veto Fee Works — For Drivers &amp; Constructors</summary>
+
+      <div class="core-idea">
+        Fee = <span class="mult">Your Value</span> × <span class="mult">How Bad the Move Is</span>
+      </div>
+      <p class="sub" style="margin-top:-8px;">Your <b>value</b> sets the ceiling. <b>How bad the move is</b> decides what slice of that ceiling you actually pay.</p>
+
+      <div class="ing-grid">
+        <div class="ing">
+          <h3>1 · Your Value</h3>
+          <p>Based on how well you're <b>actually performing this season</b> — points, finishes, podiums — not your salary. Drive well and your value (and veto ceiling) is higher.</p>
+        </div>
+        <div class="ing">
+          <h3>2 · The Seat Downgrade</h3>
+          <p>How far the destination team sits <b>below your current team</b> on championship points:</p>
+          <ul>
+            <li>Similar or better team → cheap veto (you'd want to go).</li>
+            <li>Much weaker team → expensive veto (you're dodging a disaster).</li>
+          </ul>
+        </div>
+        <div class="ing">
+          <h3>3 · The Teammate Effect</h3>
+          <p>Your teammate is your <b>ally</b> — you win the Constructors' together:</p>
+          <ul>
+            <li>Stronger teammate at the new team → <b>lowers</b> your fee.</li>
+            <li>If that teammate is <b>locked in</b> → lowers it even more.</li>
+            <li>If they're unlocked (might leave) → smaller discount.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="rails">
+        <div class="rail"><b>Floor</b><p>There's always a small minimum — the basic "right to say no."</p></div>
+        <div class="rail"><b>Ceiling</b><p>You can never pay more than <b>80% of your SLF</b> (your max championship payout). The fee can never exceed what you could realistically win back.</p></div>
+      </div>
+
+      <ul class="practice">
+        <li><b>Forced to the worst team?</b> You pay near your ceiling — loyalty is taken seriously.</li>
+        <li><b>Offered a sideways or better move?</b> Almost free — why block an upgrade?</li>
+        <li><b>Joining a stronger teammate?</b> Cheaper — the move helps you, so refusing costs less.</li>
+        <li><b>A backmarker offered a top seat?</b> Barely anything — you'd want to go.</li>
+      </ul>
+
+      <div class="one-line">
+        In one sentence: your veto costs more the better you're driving and the worse the team you're sent to — but it's discounted if you'd join a stronger teammate, and it can never exceed 80% of your prize money.
+      </div>
+    </details>
   </div>
 </div>
 
