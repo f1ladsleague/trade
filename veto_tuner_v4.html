@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F1 Lads — Veto Fee (Bespoke Teammate Model)</title>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e10600;--dark:#15151e;--card:#1f1f27;--hover:#2a2a35;}
+  *{box-sizing:border-box;}
+  body{font-family:'Titillium Web',sans-serif;background:var(--dark);color:#fff;margin:0;padding:22px;}
+  .wrap{max-width:1280px;margin:0 auto;}
+  h1{text-transform:uppercase;font-weight:900;letter-spacing:1px;margin:0 0 3px;font-size:26px;}
+  .sub{color:#aaa;margin:0 0 20px;font-size:13px;line-height:1.5;}
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;}
+  @media(max-width:960px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid #333;border-radius:12px;padding:18px;margin-bottom:20px;}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--red);margin:0 0 14px;border-bottom:1px solid #333;padding-bottom:7px;}
+  .ctrl{margin-bottom:15px;}
+  .ctrl label{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:5px;}
+  .ctrl label .val{font-family:monospace;color:#ffd700;}
+  input[type=range]{width:100%;accent-color:var(--red);cursor:pointer;}
+  select{background:var(--hover);border:1px solid #444;color:#fff;padding:9px;border-radius:6px;width:100%;font-family:inherit;font-weight:700;margin-bottom:12px;}
+  .toggle-row{display:flex;gap:8px;margin-bottom:14px;}
+  .toggle-row button{flex:1;background:var(--hover);border:1px solid #444;color:#aaa;padding:8px;border-radius:6px;font-weight:700;cursor:pointer;text-transform:uppercase;font-size:11px;font-family:inherit;transition:.2s;}
+  .toggle-row button.on{background:var(--red);color:#fff;border-color:var(--red);}
+  .derived{background:#14141b;border:1px solid #333;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;margin-bottom:8px;}
+  .derived b{color:#ffd700;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;padding:9px 7px;color:#888;text-transform:uppercase;font-size:10px;letter-spacing:1px;border-bottom:1px solid #333;}
+  td{padding:8px 7px;border-bottom:1px solid #2a2a35;font-weight:600;}
+  td.mono{font-family:monospace;}
+  .bar-track{background:#14141b;border-radius:5px;height:16px;overflow:hidden;position:relative;min-width:80px;}
+  .bar-fill{height:100%;border-radius:5px;transition:width .25s;}
+  .bar-lbl{position:absolute;right:5px;top:0;line-height:16px;font-family:monospace;font-size:10px;font-weight:900;color:#fff;text-shadow:0 1px 2px #000;}
+  .summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .stat{flex:1;min-width:105px;background:var(--hover);border-radius:8px;padding:11px 13px;border-left:4px solid var(--red);}
+  .stat .n{font-size:21px;font-weight:900;font-family:monospace;}
+  .stat .l{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;}
+  .note{font-size:11px;color:#888;margin-top:12px;line-height:1.5;}
+  .brk{background:var(--hover);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.85;}
+  .brk .k{color:#aaa;} .brk .v{float:right;font-family:monospace;font-weight:900;color:#ffd700;}
+  .brk .step{border-bottom:1px dashed #333;padding:2px 0;overflow:hidden;}
+  .formula-tag{display:block;background:var(--hover);border:1px solid #444;border-radius:6px;padding:9px 12px;font-family:monospace;font-size:11px;color:#ddd;margin-bottom:14px;line-height:1.7;}
+  .vhead{display:flex;align-items:center;gap:8px;padding:2px 3px 6px;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#666;font-weight:700;border-bottom:1px solid #333;margin-bottom:4px;}
+  .vrow{display:flex;align-items:center;gap:8px;padding:5px 3px;font-size:12px;border-bottom:1px solid #242430;}
+  .vrow .nm,.vhead .nm{flex:1;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .vrow .vcol,.vhead .vcol{font-family:monospace;font-weight:900;color:#ffd700;width:64px;text-align:right;flex-shrink:0;}
+  .vrow .pcol,.vhead .pcol{font-family:monospace;color:#8af;width:96px;text-align:right;flex-shrink:0;display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+  .vrow .pbar{flex:1;height:8px;background:#14141b;border-radius:4px;overflow:hidden;}
+  .vrow .pbar>span{display:block;height:100%;background:#4781D7;border-radius:4px;}
+  .up{color:#3fe0a0;} .down{color:#ff6b6b;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Veto Fee — Bespoke Teammate Model</h1>
+  <p class="sub"><b>Fee = Valuation × (Seat Downgrade + Teammate Effect)</b>, floored proportionally, capped at <b>80% of the driver's real SLF</b>. The teammate effect is fully performance-driven: it compares the projected points of the ally you'd keep by staying vs the ally you'd gain by moving — a stronger destination ally lowers your fee (a locked one lowers it further).</p>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>🔄 The Trade</h2>
+        <label style="font-size:11px;font-weight:700;color:#aaa;display:block;margin-bottom:5px;">Driver being traded (may veto)</label>
+        <select id="driver"></select>
+        <label style="font-size:11px;font-weight:700;color:#aaa;display:block;margin-bottom:5px;">Traded in exchange for…</label>
+        <select id="cparty"></select>
+        <div class="derived" id="derived"></div>
+        <label style="font-size:11px;font-weight:700;color:#aaa;display:block;margin:6px 0 5px;">Current ally lock (kept if you veto)</label>
+        <div class="toggle-row">
+          <button id="cLock" class="on" onclick="setCur(true)">LOCKED</button>
+          <button id="cUnlock" onclick="setCur(false)">UNLOCKED</button>
+        </div>
+        <label style="font-size:11px;font-weight:700;color:#aaa;display:block;margin-bottom:5px;">Destination ally lock (gained if you accept)</label>
+        <div class="toggle-row">
+          <button id="dLock" class="on" onclick="setDest(true)">LOCKED</button>
+          <button id="dUnlock" onclick="setDest(false)">UNLOCKED</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>🎚️ Tuning (4 levers)</h2>
+        <div class="ctrl"><label>Destination sensitivity <span class="val" id="sensV">1.20</span></label><input type="range" id="sens" min="0.5" max="3" value="1.2" step="0.1"></div>
+        <div class="ctrl"><label>Teammate influence <span class="val" id="mateV">0.60</span></label><input type="range" id="mate" min="0" max="1.5" value="0.6" step="0.05"></div>
+        <div class="ctrl"><label>Unlocked-ally leave chance <span class="val" id="leaveV">40%</span></label><input type="range" id="leave" min="0" max="1" value="0.40" step="0.05"></div>
+        <div class="ctrl"><label>Proportional floor (% of real SLF) <span class="val" id="floorV">5%</span></label><input type="range" id="floor" min="0" max="0.25" value="0.05" step="0.01"></div>
+        <p class="note">Cap is fixed at 80% of real SLF (the most anyone can be charged). Sensitivity widens the good-vs-bad-seat gap; teammate influence sets how much ally quality moves the fee.</p>
+      </div>
+
+      <div class="panel">
+        <h2>💪 Performance Inputs</h2>
+        <p class="note" style="margin-top:0;">Valuation = prize pool re-shared by performance (sizes the fee). Projected points = each driver's remaining-season scoring (drives the teammate effect).</p>
+        <div id="vboard"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>🔍 Selected Veto Breakdown</h2>
+        <div class="formula-tag">
+          SeatGap = ((curPts − destPts) / spread) ^ (1/sens)<br>
+          MateEffect = −mateInfluence × (effDestAlly − effCurAlly) / topProj &nbsp;<span style="color:#777;">(ally proj discounted if UNLOCKED)</span><br>
+          Fee = clamp( floor , Valuation × (SeatGap + MateEffect) , 80% × real SLF )
+        </div>
+        <div class="brk" id="breakdown"></div>
+      </div>
+
+      <div class="panel">
+        <h2>📊 This driver → every destination</h2>
+        <div class="summary" id="summary"></div>
+        <table>
+          <thead><tr><th>Destination (swap for)</th><th>SeatGap</th><th>DestAlly</th><th>MateEff</th><th>Fee</th></tr></thead>
+          <tbody id="destrows"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>📋 Whole grid → forced to chosen destination</h2>
+        <table>
+          <thead><tr><th>Driver</th><th>Val</th><th>Cap(80%)</th><th>Fee</th><th style="width:120px;">% of SLF</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const AVGPOS={"Mapa":2.21,"Sameera":3.4,"Nuwie G":3.9,"Shahan":4.5,"Sahan":4.9,"Rodda":5.5,"Kalpa":5.5,"Shiyan":6.2,"Eranga":7.7,"Nippa E":8.7};
+const SLF={"Mapa":475,"Nuwie G":310,"Sahan":200,"Rodda":200,"Kalpa":128,"Shahan":150,"Sameera":125,"Shiyan":25,"Eranga":50,"Nippa E":25};
+const DSS={"Mapa":0.96,"Sameera":0.77,"Nuwie G":0.66,"Shahan":0.57,"Sahan":0.44,"Rodda":0.43,"Kalpa":0.43,"Shiyan":0.32,"Eranga":0.18,"Nippa E":0.10};
+const teamPts={"Ferrari":324,"Aston Martin":311,"McLaren":302,"Mercedes":204,"Red Bull":70};
+const teamColor={"Ferrari":"#ED1131","Aston Martin":"#229971","McLaren":"#F47600","Mercedes":"#00D7B6","Red Bull":"#4781D7"};
+let roster={"Ferrari":["Mapa","Shiyan"],"Aston Martin":["Nuwie G","Shahan"],"McLaren":["Sahan","Sameera"],"Mercedes":["Rodda","Kalpa"],"Red Bull":["Eranga","Nippa E"]};
+const FEAT={1:30,2:22,3:16,4:12,5:10,6:8,7:6,8:4,9:2,10:1};
+const SPR={1:15,2:12,3:9,4:7,5:6,6:5,7:4,8:3,9:2,10:1};
+const F_LEFT=6, S_LEFT=8;
+const SPREAD=Math.max(...Object.values(teamPts))-Math.min(...Object.values(teamPts));
+const CAP_PCT=0.80;
+
+// projected remaining points per driver (objective quality proxy)
+function expPts(avg,table){let tot=0,w=0;[[-2,.12],[-1,.20],[0,.36],[1,.20],[2,.12]].forEach(([o,ww])=>{const pos=Math.max(1,Math.round(avg+o));tot+=ww*(table[pos]||0);w+=ww;});return tot/w;}
+const PROJ={}; Object.keys(AVGPOS).forEach(d=>PROJ[d]=F_LEFT*expPts(AVGPOS[d],FEAT)+S_LEFT*expPts(AVGPOS[d],SPR));
+const AVGPROJ=Object.values(PROJ).reduce((a,b)=>a+b,0)/Object.keys(PROJ).length;
+const TOPPROJ=Math.max(...Object.values(PROJ));
+
+// valuation = pool re-shared by performance
+const POOL=Object.values(SLF).reduce((a,b)=>a+b,0);
+const DSUM=Object.values(DSS).reduce((a,b)=>a+b,0);
+const VAL={}; Object.keys(DSS).forEach(d=>VAL[d]=POOL*DSS[d]/DSUM);
+
+let curLock=true, destLock=true;
+function teamOf(d){for(const t in roster)if(roster[t].includes(d))return t;}
+const drvSel=document.getElementById('driver'),cpSel=document.getElementById('cparty');
+Object.keys(SLF).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=`${n} (${teamOf(n)})`;drvSel.appendChild(o);});
+function refreshCP(){const d=drvSel.value,prev=cpSel.value;cpSel.innerHTML="";
+  Object.keys(SLF).filter(n=>teamOf(n)!==teamOf(d)).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=`${n} (${teamOf(n)})`;cpSel.appendChild(o);});
+  if([...cpSel.options].some(o=>o.value===prev))cpSel.value=prev;}
+function setCur(v){curLock=v;cLock.classList.toggle('on',v);cUnlock.classList.toggle('on',!v);render();}
+function setDest(v){destLock=v;dLock.classList.toggle('on',v);dUnlock.classList.toggle('on',!v);render();}
+
+function effMate(mate,locked){
+  if(!mate) return 0;
+  if(locked) return PROJ[mate];
+  const lv=+leave.value;
+  return (1-lv)*PROJ[mate]+lv*AVGPROJ;  // unlocked: may be replaced by an average driver
+}
+function feeFor(driver,cp){
+  const cur=teamOf(driver),dest=teamOf(cp);
+  const val=VAL[driver];
+  const seat=Math.pow(Math.max(0,(teamPts[cur]-teamPts[dest])/SPREAD),1/(+sens.value));
+  const curMate=roster[cur].find(x=>x!==driver);
+  const destMate=roster[dest].find(x=>x!==cp);
+  const effCur=effMate(curMate,curLock);
+  const effDest=effMate(destMate,destLock);
+  const mateEff=-(+mate.value)*(effDest-effCur)/TOPPROJ;   // better dest ally -> lowers fee
+  const factor=Math.max(0,Math.min(1,seat+mateEff));
+  const cap=CAP_PCT*SLF[driver];
+  const fee=Math.min(cap,Math.max((+floor.value)*SLF[driver],val*factor));
+  return {fee,seat,mateEff,factor,val,cap,cur,dest,curMate,destMate,effCur,effDest};
+}
+
+function render(){
+  sensV.textContent=(+sens.value).toFixed(2);
+  mateV.textContent=(+mate.value).toFixed(2);
+  leaveV.textContent=Math.round(100*+leave.value)+"%";
+  floorV.textContent=Math.round(100*+floor.value)+"%";
+
+  const maxProj=Math.max(...Object.values(PROJ));
+  document.getElementById('vboard').innerHTML=
+    `<div class="vhead"><span class="nm">Driver</span><span class="vcol">Valuation</span><span class="pcol">Proj pts</span></div>`+
+    Object.keys(VAL).sort((a,b)=>VAL[b]-VAL[a]).map(d=>
+      `<div class="vrow">
+        <span class="nm">${d}</span>
+        <span class="vcol">$${VAL[d].toFixed(0)}</span>
+        <span class="pcol"><span class="pbar"><span style="width:${100*PROJ[d]/maxProj}%;"></span></span>${PROJ[d].toFixed(0)}</span>
+      </div>`).join('');
+
+  const driver=drvSel.value,cp=cpSel.value; if(!cp)return;
+  const R=feeFor(driver,cp);
+  document.getElementById('derived').innerHTML=
+    `<b>${driver}</b> (${R.cur}) ⇄ <b>${cp}</b> (${R.dest})<br>`+
+    `Veto → stay with <b>${R.curMate||'—'}</b> ${curLock?'🔒':'🔓'} (proj ${PROJ[R.curMate]?PROJ[R.curMate].toFixed(0):'—'}). Accept → ally <b>${R.destMate||'—'}</b> ${destLock?'🔒':'🔓'} (proj ${PROJ[R.destMate]?PROJ[R.destMate].toFixed(0):'—'}).`;
+
+  document.getElementById('breakdown').innerHTML=`
+    <div class="step"><span class="k">Real SLF (max recoverable)</span><span class="v">$${SLF[driver]}</span></div>
+    <div class="step"><span class="k">Performance valuation (sizing)</span><span class="v">$${R.val.toFixed(0)}</span></div>
+    <div class="step"><span class="k">${R.cur} ${teamPts[R.cur]}pts → ${R.dest} ${teamPts[R.dest]}pts</span><span class="v">seat ${R.seat.toFixed(2)}</span></div>
+    <div class="step"><span class="k">Ally: ${R.destMate||'—'}(${R.effDest.toFixed(0)}) vs ${R.curMate||'—'}(${R.effCur.toFixed(0)})</span><span class="v">${R.mateEff>=0?'+':''}${R.mateEff.toFixed(2)}</span></div>
+    <div class="step"><span class="k">Effective factor</span><span class="v">${R.factor.toFixed(2)}</span></div>
+    <div class="step"><span class="k">80% SLF cap</span><span class="v">$${R.cap.toFixed(0)}</span></div>
+    <div class="step" style="border:none;"><span class="k" style="font-size:15px;color:#fff;">VETO FEE</span><span class="v" style="font-size:18px;">$${R.fee.toFixed(2)}</span></div>`;
+
+  let dr="",fees=[];
+  Object.keys(teamPts).filter(t=>t!==teamOf(driver)).forEach(dest=>{
+    const cpd=roster[dest][0]; const R2=feeFor(driver,cpd); fees.push(R2.fee);
+    dr+=`<tr><td><span style="color:${teamColor[dest]};font-weight:900;">${dest}</span> <span style="font-size:9px;color:#777;">swap ${cpd}</span></td>
+      <td class="mono">${R2.seat.toFixed(2)}</td>
+      <td>${R2.destMate||'—'}</td>
+      <td class="mono" style="color:${R2.mateEff<=0?'#3fe0a0':'#ff6b6b'};">${R2.mateEff>=0?'+':''}${R2.mateEff.toFixed(2)}</td>
+      <td class="mono" style="color:#ffd700;font-size:15px;">$${R2.fee.toFixed(0)}</td></tr>`;});
+  document.getElementById('destrows').innerHTML=dr;
+  const mn=Math.min(...fees),mx=Math.max(...fees);
+  document.getElementById('summary').innerHTML=`
+    <div class="stat"><div class="n">$${mx.toFixed(0)}</div><div class="l">Worst-seat fee</div></div>
+    <div class="stat"><div class="n">$${mn.toFixed(0)}</div><div class="l">Best-seat fee</div></div>
+    <div class="stat"><div class="n">$${(mx-mn).toFixed(0)}</div><div class="l">Destination spread</div></div>
+    <div class="stat"><div class="n">$${R.val.toFixed(0)}</div><div class="l">Valuation</div></div>`;
+
+  const destTeam=teamOf(cp); let rows="";
+  Object.keys(SLF).forEach(n=>{
+    if(teamOf(n)===destTeam)return;
+    const R3=feeFor(n,cp); const pct=100*R3.fee/SLF[n]; const c=teamColor[teamOf(n)];
+    rows+=`<tr><td>${n}<br><span style="font-size:9px;color:#777;">${teamOf(n)}</span></td>
+      <td class="mono">$${R3.val.toFixed(0)}</td>
+      <td class="mono" style="color:#888;">$${R3.cap.toFixed(0)}</td>
+      <td class="mono" style="color:#ffd700;">$${R3.fee.toFixed(0)}</td>
+      <td><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct)}%;background:${c};"></div><span class="bar-lbl">${pct.toFixed(0)}%</span></div></td></tr>`;});
+  document.getElementById('rows').innerHTML=rows;
+}
+
+drvSel.addEventListener('change',()=>{refreshCP();render();});
+cpSel.addEventListener('change',render);
+['sens','mate','leave','floor'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+refreshCP(); render();
+</script>
+</body>
+</html>
