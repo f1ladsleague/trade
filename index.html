@@ -913,7 +913,13 @@
     window.driverVeto = async function(fee){
         await refreshAll(); if(auctionState.phase!=='veto'){ render(); return; }
         const s=auctionState, t=s.target_driver;
+        fee = round2(fee);
         await supabaseClient.from('auction_drivers').update({locked:true,updated_at:new Date().toISOString()}).eq('driver',t);
+        // Veto fee is paid from the driver's PERSONAL funds into the League pot.
+        // It does NOT touch any team's budget cap — only the league ledger marker.
+        await supabaseClient.from('auction_cap_ledger').insert([
+            {round_no:s.round_no, constructor:LEAGUE_KEY, delta:fee, reason:'veto_fee'}
+        ]);
         await supabaseClient.from('auction_trades').insert([{round_no:s.round_no,target_driver:t,seller_team:s.seller_team,buyer_team:s.winning_team,cash_amount:Number(s.winning_bid),outcome:'vetoed',veto_fee_paid:fee,driver_out:t}]);
         await advanceToNextOrEnd();
     };
