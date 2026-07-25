@@ -270,6 +270,81 @@
         return driverImages[driverName] || '';   // fallback to old headshot if anything is missing
     }
 
+    // =========================================================
+    // DYNAMIC VETO FEE — Bespoke Teammate Model (final settings)
+    //   sensitivity 2.0 · teammate 0.7 · unlocked-leave 50% · floor 12% · cap 80%
+    // =========================================================
+    var VF_AVGPOS = {"Mapa":2.21,"Sameera":3.4,"Nuwie G":3.9,"Shahan":4.5,"Sahan":4.9,"Rodda":5.5,"Kalpa":5.5,"Shiyan":6.2,"Eranga":7.7,"Nippa E":8.7};
+    var VF_SLF    = {"Mapa":475,"Nuwie G":310,"Sahan":200,"Rodda":200,"Kalpa":128,"Shahan":150,"Sameera":125,"Shiyan":25,"Eranga":50,"Nippa E":25};
+    var VF_DSS    = {"Mapa":0.96,"Sameera":0.77,"Nuwie G":0.66,"Shahan":0.57,"Sahan":0.44,"Rodda":0.43,"Kalpa":0.43,"Shiyan":0.32,"Eranga":0.18,"Nippa E":0.10};
+    var VF_TEAMPTS = {"Ferrari":324,"Aston Martin":311,"McLaren":302,"Mercedes":204,"Red Bull":70};
+    var VF_FEAT = {1:30,2:22,3:16,4:12,5:10,6:8,7:6,8:4,9:2,10:1};
+    var VF_SPR  = {1:15,2:12,3:9,4:7,5:6,6:5,7:4,8:3,9:2,10:1};
+    var VF_F_LEFT = 6, VF_S_LEFT = 8;
+    var VF_SENS = 2.0, VF_MATE = 0.7, VF_LEAVE = 0.5, VF_FLOOR = 0.12, VF_CAP = 0.80;
+
+    function vfPtsAt(t, pos){
+        if(pos <= 1) return t[1];
+        if(pos >= 10){ return t[10] ? t[10] : 0; }
+        var lo = Math.floor(pos);
+        var hi = lo + 1;
+        var fr = pos - lo;
+        var vlo = t[lo] ? t[lo] : 0;
+        var vhi = t[hi] ? t[hi] : 0;
+        return vlo + (vhi - vlo) * fr;
+    }
+    function vfExpPts(avg, table){
+        var offs = [[-2,0.12],[-1,0.20],[0,0.36],[1,0.20],[2,0.12]];
+        var tot = 0, w = 0;
+        for(var i=0;i<offs.length;i++){
+            var pos = Math.min(10, Math.max(1, avg + offs[i][0]));
+            tot += offs[i][1] * vfPtsAt(table, pos);
+            w += offs[i][1];
+        }
+        return tot / w;
+    }
+    var VF_PROJ = {};
+    Object.keys(VF_AVGPOS).forEach(function(d){
+        VF_PROJ[d] = VF_F_LEFT*vfExpPts(VF_AVGPOS[d], VF_FEAT) + VF_S_LEFT*vfExpPts(VF_AVGPOS[d], VF_SPR);
+    });
+    var VF_TOP = Math.max.apply(null, Object.values(VF_PROJ));
+    var VF_RES = Math.min.apply(null, Object.values(VF_PROJ));
+    var VF_POOL = Object.values(VF_SLF).reduce(function(a,b){return a+b;}, 0);
+    var VF_DSUM = Object.values(VF_DSS).reduce(function(a,b){return a+b;}, 0);
+    var VF_VAL = {};
+    Object.keys(VF_DSS).forEach(function(d){ VF_VAL[d] = VF_POOL*VF_DSS[d]/VF_DSUM; });
+
+    function vfEffMate(mate, locked){
+        if(!mate || VF_PROJ[mate] === undefined) return 0;
+        if(locked) return VF_PROJ[mate];
+        return (1 - VF_LEAVE)*VF_PROJ[mate] + VF_LEAVE*VF_RES;
+    }
+    function computeVetoFee(driver, counterparty, curTeam, destTeam){
+        if(VF_SLF[driver] === undefined || VF_TEAMPTS[curTeam] === undefined || VF_TEAMPTS[destTeam] === undefined){
+            var tc = tierConfig[driver];
+            return { fee: tc ? tc.veto : 0, fallback: true };
+        }
+        var pts = Object.values(VF_TEAMPTS);
+        var SPREAD = Math.max.apply(null, pts) - Math.min.apply(null, pts);
+        var seat = Math.pow(Math.max(0, (VF_TEAMPTS[curTeam] - VF_TEAMPTS[destTeam]) / SPREAD), 1 / VF_SENS);
+        var curAllyRow = liveDrivers.find(function(d){ return d.current_team === curTeam && d.driver !== driver; });
+        var destAllyRow = liveDrivers.find(function(d){ return d.current_team === destTeam && d.driver !== counterparty; });
+        var curAlly = curAllyRow ? curAllyRow.driver : null;
+        var destAlly = destAllyRow ? destAllyRow.driver : null;
+        var curLk = curAllyRow ? !!curAllyRow.locked : true;
+        var destLk = destAllyRow ? !!destAllyRow.locked : true;
+        var effCur = vfEffMate(curAlly, curLk);
+        var effDest = vfEffMate(destAlly, destLk);
+        var mateEff = -VF_MATE * (effDest - effCur) / VF_TOP;
+        var factor = Math.max(0, Math.min(1, seat + mateEff));
+        var cap = VF_CAP * VF_SLF[driver];
+        var floor = VF_FLOOR * VF_SLF[driver];
+        var fee = Math.min(cap, Math.max(floor, VF_VAL[driver] * factor));
+        return { fee: round2(fee), seat: seat, mateEff: mateEff, factor: factor,
+                 curAlly: curAlly, destAlly: destAlly, curLk: curLk, destLk: destLk,
+                 cap: cap, floor: floor, val: VF_VAL[driver] };
+    }
+
     function getTeamColor(t){ t=(t||"").toLowerCase();
         if(t.includes("mercedes"))return"#00D7B6"; if(t.includes("red bull"))return"#4781D7";
         if(t.includes("ferrari"))return"#ED1131"; if(t.includes("mclaren"))return"#F47600";
@@ -652,14 +727,23 @@
     function renderDriver(phase){
         const meDrv=liveDrivers.find(d=>d.driver===me);
         if(phase==='veto' && auctionState.target_driver===me && auctionState.winning_team){
-            const cfg=tierConfig[me]||{veto:meDrv?meDrv.veto_fee:0};
+            const vf = computeVetoFee(me, auctionState.winning_swap, auctionState.seller_team, auctionState.winning_team);
+            const vfee = round2(vf.fee);
+            const breakdown = vf.fallback ? '' :
+                `<p class="info-line" style="margin-top:8px;font-size:12px;">
+                    Seat downgrade ${auctionState.seller_team} → ${auctionState.winning_team} ·
+                    new ally ${vf.destAlly||'—'} ${vf.destLk?'🔒':'🔓'} vs current ally ${vf.curAlly||'—'} ${vf.curLk?'🔒':'🔓'}.
+                    Capped at 80% of your SLF (${money(vf.cap)}), floored at 12% (${money(vf.floor)}).
+                 </p>`;
             return `<div class="section-box"><h1 style="font-size:18px;color:var(--theme-color);text-align:center;">You've Been Traded!</h1>
                 <p class="info-line">${auctionState.seller_team} → <strong>${auctionState.winning_team}</strong> for ${money(auctionState.winning_bid)} (swap: ${auctionState.winning_swap}).</p>
                 <div class="option-box"><h3>Accept the Trade</h3><p>You join ${auctionState.winning_team}. You'll be LOCKED for the rest of the window.</p>
                     <button class="btn-primary" onclick="driverAccept()">Accept Trade</button></div>
-                <div class="option-box" style="border-color:#ff4444;"><h3>Veto (pay $${cfg.veto})</h3>
-                    <p>Pay your Tier veto fee from personal funds to block the trade & stay put. You'll be LOCKED either way.</p>
-                    <button class="btn-primary" style="background:#ff4444;" onclick="driverVeto(${cfg.veto})">Veto — Pay $${cfg.veto}</button></div></div>`;
+                <div class="option-box" style="border-color:#ff4444;"><h3>Veto (pay ${money(vfee)})</h3>
+                    <p>Pay this fee from personal funds to block the trade & stay put. You'll be LOCKED either way.</p>
+                    <div class="fee-box"><div class="phase-label">Dynamic Veto Fee</div><div class="fee-val">${money(vfee)}</div></div>
+                    ${breakdown}
+                    <button class="btn-primary" style="background:#ff4444;margin-top:12px;" onclick="driverVeto(${vfee})">Veto — Pay ${money(vfee)}</button></div></div>`;
         }
         if(meDrv && meDrv.locked) return statusMsg("🔒",`You are LOCKED — no further trades affect you. Current team: <strong>${meDrv.current_team}</strong>.`);
         return statusMsg("👀",`Nothing needs your action right now. If a bid is accepted for you, your veto decision appears here. Current team: <strong>${meDrv?meDrv.current_team:'—'}</strong>.`);
