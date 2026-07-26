@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>F1 Lads — Dynamic Veto Fee Briefing</title>
+<style>
+  :root{--dark:#15151E;--card:#1F1F27;--red:#E10600;--gold:#FFD700;--mute:#9AA0AA;--green:#3FE0A0;--blue:#4781D7;--orange:#F47600; --mer: #00D7B6; --fer: #ED1131; --amr: #229971; --mcl: #F47600; --rb: #4781D7;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#0b0b10;font-family:Arial,Helvetica,sans-serif;padding:20px;}
+  .slide{width:1000px;height:563px;background:var(--dark);color:#fff;margin:0 auto 24px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.6);}
+  .bar{position:absolute;top:0;left:0;width:100%;height:105px;background:var(--card);}
+  .bar::before{content:"";position:absolute;left:0;top:0;width:12px;height:105px;background:var(--red);}
+  .kick{position:absolute;top:12px;left:42px;font-size:11px;color:var(--red);font-weight:bold;letter-spacing:3px;}
+  .ttl{position:absolute;top:34px;left:42px;font-size:27px;font-weight:900;}
+  .body{position:absolute;top:120px;left:42px;right:42px;}
+  .foot{position:absolute;bottom:16px;left:42px;font-size:9px;color:var(--mute);}
+  .pg{position:absolute;bottom:16px;right:42px;font-size:9px;color:var(--mute);}
+  .card{background:var(--card);border-radius:2px;padding:14px 18px;margin-bottom:12px;position:relative;box-shadow:0 3px 10px rgba(0,0,0,.35);}
+  .card::before{content:"";position:absolute;left:0;top:0;width:7px;height:100%;background:var(--acc,var(--red));}
+  .card h3{font-size:15px;margin-bottom:6px;}
+  .card p{font-size:12px;color:var(--mute);line-height:1.5;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .box{background:var(--card);padding:16px 18px;border-top:5px solid var(--acc,var(--gold));box-shadow:0 3px 10px rgba(0,0,0,.35);}
+  .box h4{font-size:12px;font-weight:900;margin-bottom:10px;color:var(--acc,var(--gold));}
+  .box p{font-size:12px;color:var(--mute);line-height:1.55;}
+  .box strong{color:#fff;display:block;margin-top:8px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{text-align:left;padding:8px;color:var(--mute);font-size:10px;letter-spacing:1px;border-bottom:1px solid #33333D;}
+  td{padding:8px;border-bottom:1px solid #2a2a33;}
+  .val{color:var(--gold);font-weight:bold;}
+  .big{font-size:46px;font-weight:900;color:var(--gold);}
+  .note{font-size:11.5px;color:var(--mute);font-style:italic;line-height:1.5;margin-top:14px;}
+  .hero{background:var(--card);padding:18px 22px;font-size:19px;font-weight:bold;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.4);}
+  .row{display:flex;align-items:center;background:var(--card);padding:12px 16px;margin-bottom:10px;position:relative;}
+  .row::before{content:"";position:absolute;left:0;top:0;width:7px;height:100%;background:var(--acc,var(--red));}
+  .num{width:34px;height:34px;border-radius:50%;background:var(--acc,var(--gold));color:var(--dark);font-weight:900;display:flex;align-items:center;justify-content:center;margin-right:14px;font-size:15px;flex-shrink:0;}
+  @media print{body{background:#fff;padding:0;}.slide{margin:0;page-break-after:always;box-shadow:none;}}
+</style>
+</head>
+<body>
+
+<!-- 1 TITLE -->
+<div class="slide" style="padding:0;">
+  <div style="position:absolute;left:0;top:0;width:35px;height:100%;background:var(--red);"></div>
+  <div style="position:absolute;left:100px;top:115px;">
+    <div style="font-size:13px;color:var(--red);font-weight:bold;letter-spacing:6px;">F1 LADS LEAGUE</div>
+    <div style="font-size:44px;font-weight:900;margin-top:14px;">The Dynamic Veto Fee</div>
+    <div style="font-size:17px;color:var(--mute);font-style:italic;margin-top:12px;">How it works, and why each part exists</div>
+    <div class="hero" style="width:790px;margin-top:38px;">
+      Fee = <span style="color:var(--gold)">Your Value</span> &nbsp;×&nbsp; <span style="color:var(--gold)">How Bad the Move Is</span>
+    </div>
+    <div style="font-size:11px;color:var(--mute);letter-spacing:2px;margin-top:30px;">BRIEFING FOR CONSTRUCTORS &amp; DRIVERS</div>
+  </div>
+</div>
+
+<!-- 2 PROBLEM -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">THE PROBLEM</div><div class="ttl">Why the old flat fee had to go</div>
+  <div class="body">
+    <div class="card"><h3>Backmarkers were frozen out</h3><p>A flat fee meant weak teams could never realistically prise a driver away. The market was dead.</p></div>
+    <div class="card"><h3>Vetoes were a free destination-picker</h3><p>Top drivers paid the same low fee whether dodging a disaster or blocking a sideways move.</p></div>
+    <div class="card"><h3>Tiers went stale</h3><p>Sameera sat on a Tier 2 label while running 2nd in the championship. Labels stopped matching reality.</p></div>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">2</div>
+</div>
+
+<!-- 3 PRINCIPLE -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">THE PRINCIPLE</div><div class="ttl">What a veto fee is actually pricing</div>
+  <div class="body">
+    <div class="card" style="--acc:var(--gold);"><p style="color:#fff;font-size:15px;font-style:italic;">A veto is you saying “I refuse to move.” The fee is the price of blocking that move — so it scales with what you would actually be losing.</p></div>
+    <div class="grid3" style="margin-top:18px;">
+      <div class="box" style="--acc:var(--blue);"><h4>PERFORMANCE-BASED</h4><p>Your value comes from how you are driving this season — not your salary or an old tier label.</p></div>
+      <div class="box" style="--acc:var(--green);"><h4>PROPORTIONATE</h4><p>Dodging a disaster costs a lot. Blocking a sideways or upward move costs almost nothing.</p></div>
+      <div class="box" style="--acc:var(--gold);"><h4>BOUNDED</h4><p>A floor so everyone can say no; a ceiling so nobody pays more than they could win back.</p></div>
+    </div>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">3</div>
+</div>
+
+<!-- 4 FORMULA -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">THE FORMULA</div><div class="ttl">Three ingredients, two safety rails</div>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1.9fr 1fr;gap:18px;">
+      <div>
+        <div class="row" style="--acc:var(--gold);"><div class="num" style="--acc:var(--gold);">1</div><div><div style="font-weight:900;font-size:13px;">YOUR VALUE</div><div style="font-size:11px;color:var(--mute);">Sets your ceiling. Built from this season's points, finishes, podiums and discipline.</div></div></div>
+        <div class="row" style="--acc:var(--red);"><div class="num" style="--acc:var(--red);color:#fff;">2</div><div><div style="font-weight:900;font-size:13px;">SEAT DOWNGRADE</div><div style="font-size:11px;color:var(--mute);">How far the destination team sits below your current one — on banked points plus projected points.</div></div></div>
+        <div class="row" style="--acc:var(--blue);"><div class="num" style="--acc:var(--blue);color:#fff;">3</div><div><div style="font-weight:900;font-size:13px;">TEAMMATE EFFECT</div><div style="font-size:11px;color:var(--mute);">Your teammate is an ally. A stronger ally at the new team lowers your fee.</div></div></div>
+      </div>
+      <div class="box"><h4>THE RAILS</h4>
+        <p><strong>FLOOR — 12% of your SLF</strong>Every veto costs something. Blocking a trade is never free.
+        <strong>CEILING — 80% of your SLF</strong>You can never pay more than you could realistically win back.</p>
+      </div>
+    </div>
+    <div class="hero" style="margin-top:16px;font-size:14px;color:var(--gold);">
+      Fee = clamp ( floor , &nbsp;Value × ( Seat Downgrade + Teammate Effect ) , &nbsp;ceiling )
+    </div>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">4</div>
+</div>
+
+<!-- 5 VALUE -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">INGREDIENT 1</div><div class="ttl">Your Value — earned, not assigned</div>
+  <div class="body">
+    <p style="font-size:12.5px;color:var(--mute);margin-bottom:14px;">The league prize pool is re-shared according to how each driver is actually performing. That share becomes your veto ceiling.</p>
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:20px;">
+      <table>
+        <tr><th>DRIVER</th><th>VALUATION</th><th>CONTRACT SLF</th></tr>
+        <tr><td><b>Mapa</b></td><td class="val">$333</td><td style="color:var(--mute)">$475</td></tr>
+        <tr><td><b>Sameera</b></td><td class="val">$267</td><td style="color:var(--mute)">$125</td></tr>
+        <tr><td><b>Nuwie G</b></td><td class="val">$229</td><td style="color:var(--mute)">$310</td></tr>
+        <tr><td><b>Shahan</b></td><td class="val">$198</td><td style="color:var(--mute)">$150</td></tr>
+        <tr><td><b>Sahan</b></td><td class="val">$153</td><td style="color:var(--mute)">$200</td></tr>
+        <tr><td><b>Shiyan</b></td><td class="val">$111</td><td style="color:var(--mute)">$25</td></tr>
+      </table>
+      <div class="box"><h4>WHY THIS WAY</h4>
+        <p><strong>Rewards current form.</strong>Sameera's contract is $125, but running 2nd earns him a $267 valuation. Perform, and the system recognises it.
+        <strong>Your contract is untouched.</strong>Your real SLF payout never changes. Valuation only sizes the fee.</p>
+      </div>
+    </div>
+    <p class="note">Policy: a veto should test loyalty in proportion to what you are worth today — not what you were worth on deadline day.</p>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">5</div>
+</div>
+
+<!-- 6 SEAT -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">INGREDIENT 2</div><div class="ttl">Seat Downgrade — banked + projected</div>
+  <div class="body">
+    <p style="font-size:12.5px;color:var(--mute);margin-bottom:12px;">Team strength = championship points already banked + points that team's current drivers are projected to score.</p>
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:20px;">
+      <table>
+        <tr><th>TEAM</th><th>BANKED</th><th>PROJECTED</th><th>STRENGTH</th></tr>
+        <tr><td style="color:var(--red);font-weight:bold;">Ferrari</td><td style="color:var(--mute)">324</td><td style="color:var(--mute)">301</td><td><b>625</b></td></tr>
+        <tr><td style="color:var(--orange);font-weight:bold;">McLaren</td><td style="color:var(--mute)">302</td><td style="color:var(--mute)">277</td><td><b>579</b></td></tr>
+        <tr><td style="color:var(--green);font-weight:bold;">Aston Martin</td><td style="color:var(--mute)">311</td><td style="color:var(--mute)">268</td><td><b>579</b></td></tr>
+        <tr><td style="color:#00D7B6;font-weight:bold;">Mercedes</td><td style="color:var(--mute)">204</td><td style="color:var(--mute)">198</td><td><b>402</b></td></tr>
+        <tr><td style="color:var(--blue);font-weight:bold;">Red Bull</td><td style="color:var(--mute)">70</td><td style="color:var(--mute)">92</td><td><b>162</b></td></tr>
+      </table>
+      <div class="box" style="--acc:var(--red);"><h4>WHY BOTH HALVES</h4>
+        <p><strong>Banked points are permanent.</strong>A leading team keeps its lead even after losing a star — it cannot be erased.
+        <strong>Projected points are live.</strong>If a team is gutted by an earlier trade, leaving it becomes cheaper in later rounds. The market self-corrects.</p>
+      </div>
+    </div>
+    <p class="note">Policy: loyalty is worth defending only where there is genuinely something to defend. A downgrade is measured by real competitiveness, not reputation.</p>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">6</div>
+</div>
+
+<!-- 7 TEAMMATE -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">INGREDIENT 3</div><div class="ttl">The Teammate Effect — allies, not rivals</div>
+  <div class="body">
+    <div class="card" style="--acc:var(--blue);"><p style="color:#fff;font-size:12.5px;font-style:italic;">You win the Constructors' Championship WITH your teammate — never against them. So a strong teammate is an asset, not a threat.</p></div>
+    <div class="grid2" style="margin-top:14px;">
+      <div class="card" style="--acc:var(--green);margin:0;"><h3 style="font-size:12px;">Stronger ally at the NEW team</h3><p style="color:var(--green);">Moving becomes attractive → your veto costs LESS</p></div>
+      <div class="card" style="--acc:var(--red);margin:0;"><h3 style="font-size:12px;">Stronger ally if you STAY</h3><p style="color:var(--red);">Staying is valuable → your veto costs MORE</p></div>
+      <div class="card" style="--acc:var(--gold);margin:0;"><h3 style="font-size:12px;">That ally is LOCKED IN</h3><p style="color:var(--gold);">A safe bet → the effect counts in full</p></div>
+      <div class="card" style="--acc:var(--mute);margin:0;"><h3 style="font-size:12px;">That ally is UNLOCKED</h3><p>They may be traded away → effect discounted</p></div>
+    </div>
+    <p class="note" style="text-align:center;">Lock status matters far more for a STRONG ally than a weak one. Losing a title contender is a real risk; losing a backmarker changes nothing.</p>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">7</div>
+</div>
+
+<!-- 8 EXAMPLE 1 -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">WORKED EXAMPLE 1</div><div class="ttl">Mapa forced to Red Bull — the worst case</div>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:20px;">
+      <table>
+        <tr><td style="color:var(--red);font-weight:bold;width:130px;">Team strength</td><td>Ferrari 625 → Red Bull 162</td><td style="color:var(--mute);font-size:10px;">Gap = 463 of a 464 spread</td></tr>
+        <tr><td style="color:var(--red);font-weight:bold;">Seat downgrade</td><td>1.00 (maximum)</td><td style="color:var(--mute);font-size:10px;">The biggest downgrade available</td></tr>
+        <tr><td style="color:var(--red);font-weight:bold;">Teammate</td><td>Shiyan 84 vs Eranga 55</td><td style="color:var(--mute);font-size:10px;">Worse ally → pushes fee UP</td></tr>
+        <tr><td style="color:var(--red);font-weight:bold;">Valuation</td><td>$333</td><td style="color:var(--mute);font-size:10px;">Mapa's performance share</td></tr>
+        <tr><td style="color:var(--red);font-weight:bold;">Rails</td><td>Floor $57 · Ceiling $380</td><td style="color:var(--mute);font-size:10px;">Well inside the ceiling</td></tr>
+      </table>
+      <div class="box" style="text-align:center;">
+        <div style="font-size:11px;color:var(--mute);letter-spacing:2px;">VETO FEE</div>
+        <div class="big" style="margin:10px 0;">$333</div>
+        <div style="font-size:10px;color:var(--mute);">100% of valuation</div>
+        <div style="font-size:10px;color:var(--mute);font-style:italic;margin-top:6px;">Dodging the worst seat on the grid</div>
+      </div>
+    </div>
+    <p class="note">Rationale: an elite driver being dumped into an uncompetitive car is exactly the situation a veto exists for — and it should cost real money to exercise.</p>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">8</div>
+</div>
+
+<!-- 9 EXAMPLE 2 -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">WORKED EXAMPLE 2</div><div class="ttl">Mapa to Aston Martin — and why locks matter</div>
+  <div class="body">
+    <p style="font-size:12px;color:var(--mute);margin-bottom:14px;">Ferrari 625 → Aston Martin 579. Barely a downgrade — and Mapa would gain Nuwie G (143) as an ally, far stronger than Shiyan (84).</p>
+    <div class="grid2">
+      <div class="box" style="--acc:var(--green);"><h4>NUWIE G LOCKED IN</h4><div class="big">$57</div>
+        <p style="margin-top:10px;">Seat downgrade 0.32, ally bonus −0.19 → falls to the floor. A guaranteed strong ally makes the move genuinely attractive.</p></div>
+      <div class="box" style="--acc:var(--red);"><h4>NUWIE G UNLOCKED</h4><div class="big">$98</div>
+        <p style="margin-top:10px;">Ally value discounted (143 → 90) because he might be traded away. The benefit is less certain, so the fee rises.</p></div>
+    </div>
+    <div class="card" style="--acc:var(--gold);margin-top:16px;"><p style="color:#fff;font-style:italic;">Rationale: locking a driver is a commitment, and the system rewards it. Certainty about your line-up makes your seat more attractive — and cheaper to fill.</p></div>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">9</div>
+</div>
+
+<!-- 10 EXAMPLE 3 -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">WORKED EXAMPLE 3</div><div class="ttl">The same driver, every destination</div>
+  <div class="body">
+    <p style="font-size:12.5px;color:var(--mute);margin-bottom:14px;">Mapa's veto fee changes dramatically depending on where he is being sent — which is the whole point.</p>
+    <div class="row" style="--acc:var(--amr);"><div style="flex:0 0 190px;font-weight:900;font-size:14px;">Aston Martin</div><div style="flex:0 0 130px;color:var(--mute);font-size:11px;">strength 579</div><div style="flex:1;color:var(--mute);font-size:11px;">Near-lateral — floor only</div><div style="font-size:21px;font-weight:900;color:var(--gold);">$57</div></div>
+    <div class="row" style="--acc:var(--mcl);"><div style="flex:0 0 190px;font-weight:900;font-size:14px;">McLaren</div><div style="flex:0 0 130px;color:var(--mute);font-size:11px;">strength 579</div><div style="flex:1;color:var(--mute);font-size:11px;">Near-lateral — floor only</div><div style="font-size:21px;font-weight:900;color:var(--gold);">$57</div></div>
+    <div class="row" style="--acc:var(--mer);"><div style="flex:0 0 190px;font-weight:900;font-size:14px;">Mercedes</div><div style="flex:0 0 130px;color:var(--mute);font-size:11px;">strength 402</div><div style="flex:1;color:var(--mute);font-size:11px;">Real downgrade</div><div style="font-size:21px;font-weight:900;color:var(--gold);">$215</div></div>
+    <div class="row" style="--acc:var(--rb);"><div style="flex:0 0 190px;font-weight:900;font-size:14px;">Red Bull</div><div style="flex:0 0 130px;color:var(--mute);font-size:11px;">strength 162</div><div style="flex:1;color:var(--mute);font-size:11px;">Severe downgrade</div><div style="font-size:21px;font-weight:900;color:var(--gold);">$333</div></div>
+    <p class="note">Rationale: the veto stops being a free destination-picker. Refusing a fair move is cheap; refusing a career-damaging one is expensive.</p>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">10</div>
+</div>
+
+<!-- 11 RAILS -->
+<div class="slide">
+  <div class="bar"></div><div class="kick">THE RAILS</div><div class="ttl">Floor and ceiling — fairness in both directions</div>
+  <div class="body">
+    <div class="card" style="--acc:var(--gold);padding:20px;">
+      <div style="display:flex;"><div style="flex:0 0 44%;"><h3 style="color:var(--gold);font-size:16px;">FLOOR — 12% of SLF</h3><p style="color:#fff;font-weight:bold;margin-top:6px;">Vetoing is never free.</p></div>
+      <div style="flex:1;"><p>Even blocking a sideways or upward move costs something. This stops frivolous vetoes and keeps the market moving.</p></div></div>
+    </div>
+    <div class="card" style="--acc:var(--green);padding:20px;">
+      <div style="display:flex;"><div style="flex:0 0 44%;"><h3 style="color:var(--green);font-size:16px;">CEILING — 80% of SLF</h3><p style="color:#fff;font-weight:bold;margin-top:6px;">Never more than you can win back.</p></div>
+      <div style="flex:1;"><p>Nobody is asked to pay more than their championship payout is worth. Sameera's veto caps at $100 against his $125 SLF.</p></div></div>
+    </div>
+    <p class="note" style="text-align:center;">Together these guarantee the fee is always affordable, always meaningful, and never irrational.</p>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div><div class="pg">11</div>
+</div>
+
+<!-- 12 SUMMARY -->
+<div class="slide">
+  <div style="position:absolute;left:0;top:0;width:35px;height:100%;background:var(--red);"></div>
+  <div style="padding:70px 60px 0 100px;">
+    <div style="font-size:12px;color:var(--red);font-weight:bold;letter-spacing:5px;">IN ONE SENTENCE</div>
+    <div class="card" style="--acc:var(--card);margin-top:16px;padding:22px;">
+      <p style="color:#fff;font-size:15px;font-style:italic;line-height:1.6;">Your veto costs more the better you are driving and the worse the team you are being sent to — discounted if you would join a stronger, locked-in teammate — with a floor of 12% and a ceiling of 80% of your prize money.</p>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="row" style="--acc:var(--red);"><div style="flex:0 0 46%;font-weight:bold;font-size:12px;">Forced to the worst team?</div><div style="color:var(--red);font-size:12px;">You pay near your ceiling.</div></div>
+      <div class="row" style="--acc:var(--green);"><div style="flex:0 0 46%;font-weight:bold;font-size:12px;">Offered a sideways or better move?</div><div style="color:var(--green);font-size:12px;">Just the floor.</div></div>
+      <div class="row" style="--acc:var(--blue);"><div style="flex:0 0 46%;font-weight:bold;font-size:12px;">Joining a stronger locked-in ally?</div><div style="color:var(--blue);font-size:12px;">Cheaper still.</div></div>
+      <div class="row" style="--acc:var(--gold);"><div style="flex:0 0 46%;font-weight:bold;font-size:12px;">A backmarker offered a top seat?</div><div style="color:var(--gold);font-size:12px;">Barely anything — you would want to go.</div></div>
+    </div>
+  </div>
+  <div class="foot">F1 Lads League · Mid-Season Trade Window</div>
+</div>
+
+</body>
+</html>
