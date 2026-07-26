@@ -104,7 +104,7 @@
 <div class="wrap">
   <div class="top">
     <div class="brand">
-      <a href="https://f1lads.com">ting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads"></a>
+      <a href="https://f1lads.com" id="logoLink"></a>
       <div><h1>Mid-Season Trade Window</h1><span>SPECTATOR FEED</span></div>
     </div>
     <div class="live"><span class="dot"></span> LIVE</div>
@@ -178,17 +178,40 @@ function pic(d,t,cls,extra){
  return '<'+'img src="'+src+'" class="'+(cls||'')+'" '+(extra||'')+' alt="'+d+'">';
 }
 function logo(t,cls){var s=logos[t]||"";return '<'+'img src="'+s+'" class="'+(cls||'')+'" alt="'+t+'">';}
+(function(){
+  var L=document.getElementById('logoLink');
+  if(L){ L.innerHTML='<'+'img src="https://raw.githubusercontent.com/f1ladsleague/sidebetting/e78422814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads">'; }
+})();
 
 let st=null,drv=[],led=[],noms=[],bids=[],trades=[],caps={},tick=null,phaseTotal=120;
 
+function parseLine(line){
+ var arr=[],q=false,cell='';
+ for(var i=0;i<line.length;i++){
+  var c=line[i],n=line[i+1];
+  if(c==='"'&&q&&n==='"'){cell+=c;i++;continue;}
+  if(c==='"'){q=!q;continue;}
+  if(c===','&&!q){arr.push(cell.trim());cell='';continue;}
+  cell+=c;
+ }
+ arr.push(cell.trim());
+ return arr;
+}
+function sheetNum(v){
+ var s=String(v||"0").trim();
+ var neg=s.indexOf('-')>=0||(s.indexOf('(')>=0&&s.indexOf(')')>=0);
+ var n=parseFloat(s.replace(/[^0-9.]/g,""));
+ if(isNaN(n))return 0;
+ return neg?-n:n;
+}
 async function csv(){
  try{
   const r=await fetch(CSV_URL+"&nocache="+Date.now(),{cache:"no-store"});
   const rows=(await r.text()).replace(/\r/g,'').split('\n').slice(1);
   rows.forEach(function(line){
    if(!line.trim())return;
-   const a=line.split(',');
-   if(a[0])caps[norm(a[0])]=parseFloat(String(a[6]||"0").replace(/[^0-9.]/g,""))||0;
+   var a=parseLine(line);
+   if(a[0])caps[norm(a[0])]=sheetNum(a[6]);
   });
  }catch(e){console.warn("caps sheet unavailable",e);}
 }
