@@ -50,6 +50,7 @@
   .vrow .pbar{flex:1;height:8px;background:#14141b;border-radius:4px;overflow:hidden;}
   .vrow .pbar>span{display:block;height:100%;background:#4781D7;border-radius:4px;}
   .up{color:#3fe0a0;} .down{color:#ff6b6b;}
+  .teamgap{border-top:2px solid #333;}
 
   /* ===== How It Works explainer ===== */
   .explain{margin-top:8px;}
@@ -78,7 +79,7 @@
 <body>
 <div class="wrap">
   <h1>Veto Fee — Bespoke Teammate Model</h1>
-  <p class="sub"><b>Fee = Valuation × (Seat Downgrade + Teammate Effect)</b>, floored proportionally, capped at <b>80% of the driver's real SLF</b>. The teammate effect is fully performance-driven: it compares the projected points of the ally you'd keep by staying vs the ally you'd gain by moving — a stronger destination ally lowers your fee (a locked one lowers it further).</p>
+  <p class="sub"><b>Fee = Valuation × (Seat Downgrade + Teammate Effect)</b>, floored proportionally, capped at <b>80% of the driver's real SLF</b>. The teammate effect is fully performance-driven and lock-aware: it compares the projected points of the ally you'd keep by staying vs the ally you'd gain by moving — and an unlocked ally is only discounted toward a reserve driver, so lock state matters far more for a strong ally than a weak one.</p>
 
   <div class="layout">
     <div>
@@ -103,16 +104,16 @@
 
       <div class="panel">
         <h2>🎚️ Tuning (4 levers)</h2>
-        <div class="ctrl"><label>Destination sensitivity <span class="val" id="sensV">2.00</span></label><input type="range" id="sens" min="0.5" max="3" value="2.0" step="0.1"></div>
-        <div class="ctrl"><label>Teammate influence <span class="val" id="mateV">0.70</span></label><input type="range" id="mate" min="0" max="1.5" value="0.7" step="0.05"></div>
-        <div class="ctrl"><label>Unlocked-ally leave chance <span class="val" id="leaveV">50%</span></label><input type="range" id="leave" min="0" max="1" value="0.50" step="0.05"></div>
-        <div class="ctrl"><label>Proportional floor (% of real SLF) <span class="val" id="floorV">12%</span></label><input type="range" id="floor" min="0" max="0.25" value="0.12" step="0.01"></div>
+        <div class="ctrl"><label>Destination sensitivity <span class="val" id="sensV">1.20</span></label><input type="range" id="sens" min="0.5" max="3" value="1.2" step="0.1"></div>
+        <div class="ctrl"><label>Teammate influence <span class="val" id="mateV">0.60</span></label><input type="range" id="mate" min="0" max="1.5" value="0.6" step="0.05"></div>
+        <div class="ctrl"><label>Unlocked-ally leave chance <span class="val" id="leaveV">40%</span></label><input type="range" id="leave" min="0" max="1" value="0.40" step="0.05"></div>
+        <div class="ctrl"><label>Proportional floor (% of real SLF) <span class="val" id="floorV">5%</span></label><input type="range" id="floor" min="0" max="0.25" value="0.05" step="0.01"></div>
         <p class="note">Cap is fixed at 80% of real SLF (the most anyone can be charged). Sensitivity widens the good-vs-bad-seat gap; teammate influence sets how much ally quality moves the fee.</p>
       </div>
 
       <div class="panel">
         <h2>💪 Performance Inputs</h2>
-        <p class="note" style="margin-top:0;">Valuation = prize pool re-shared by performance (sizes the fee). Projected points = each driver's remaining-season scoring (drives the teammate effect).</p>
+        <p class="note" style="margin-top:0;">Valuation = prize pool re-shared by performance (sizes the fee). Projected points = each driver's remaining-season scoring, interpolated from their average finishing position (drives the teammate effect).</p>
         <div id="vboard"></div>
       </div>
     </div>
@@ -122,19 +123,20 @@
         <h2>🔍 Selected Veto Breakdown</h2>
         <div class="formula-tag">
           SeatGap = ((curPts − destPts) / spread) ^ (1/sens)<br>
-          MateEffect = −mateInfluence × (effDestAlly − effCurAlly) / topProj &nbsp;<span style="color:#777;">(ally proj discounted if UNLOCKED)</span><br>
+          MateEffect = −mateInfluence × (effDestAlly − effCurAlly) / topProj &nbsp;<span style="color:#777;">(unlocked ally discounted toward a reserve driver)</span><br>
           Fee = clamp( floor , Valuation × (SeatGap + MateEffect) , 80% × real SLF )
         </div>
         <div class="brk" id="breakdown"></div>
       </div>
 
       <div class="panel">
-        <h2>📊 This driver → every destination</h2>
+        <h2>📊 This driver → every possible swap</h2>
         <div class="summary" id="summary"></div>
         <table>
-          <thead><tr><th>Destination (swap for)</th><th>SeatGap</th><th>DestAlly</th><th>MateEff</th><th>Fee</th></tr></thead>
+          <thead><tr><th>Swap for (destination)</th><th>SeatGap</th><th>New ally</th><th>MateEff</th><th>Fee</th></tr></thead>
           <tbody id="destrows"></tbody>
         </table>
+        <p class="note">Every driver you could be swapped for (8 total — excludes you and your own teammate). The "new ally" is whoever remains at that team after the swap.</p>
       </div>
 
       <div class="panel">
@@ -212,11 +214,26 @@ const F_LEFT=6, S_LEFT=8;
 const SPREAD=Math.max(...Object.values(teamPts))-Math.min(...Object.values(teamPts));
 const CAP_PCT=0.80;
 
-// projected remaining points per driver (objective quality proxy)
-function expPts(avg,table){let tot=0,w=0;[[-2,.12],[-1,.20],[0,.36],[1,.20],[2,.12]].forEach(([o,ww])=>{const pos=Math.max(1,Math.round(avg+o));tot+=ww*(table[pos]||0);w+=ww;});return tot/w;}
+// ---- projected remaining points: INTERPOLATED from avg finishing position ----
+function ptsAt(table,pos){
+  if(pos<=1) return table[1];
+  if(pos>=10) return table[10]||0;
+  const lo=Math.floor(pos), hi=lo+1, frac=pos-lo;
+  const vlo=table[lo]!==undefined?table[lo]:0;
+  const vhi=table[hi]!==undefined?table[hi]:0;
+  return vlo+(vhi-vlo)*frac;
+}
+function expPts(avg,table){
+  let tot=0,w=0;
+  [[-2,.12],[-1,.20],[0,.36],[1,.20],[2,.12]].forEach(([o,ww])=>{
+    const pos=Math.min(10,Math.max(1,avg+o));   // no rounding — interpolate
+    tot+=ww*ptsAt(table,pos); w+=ww;
+  });
+  return tot/w;
+}
 const PROJ={}; Object.keys(AVGPOS).forEach(d=>PROJ[d]=F_LEFT*expPts(AVGPOS[d],FEAT)+S_LEFT*expPts(AVGPOS[d],SPR));
-const AVGPROJ=Object.values(PROJ).reduce((a,b)=>a+b,0)/Object.keys(PROJ).length;
 const TOPPROJ=Math.max(...Object.values(PROJ));
+const RESERVE=Math.min(...Object.values(PROJ));   // reserve/backmarker level an unlocked ally may be replaced by
 
 // valuation = pool re-shared by performance
 const POOL=Object.values(SLF).reduce((a,b)=>a+b,0);
@@ -233,11 +250,13 @@ function refreshCP(){const d=drvSel.value,prev=cpSel.value;cpSel.innerHTML="";
 function setCur(v){curLock=v;cLock.classList.toggle('on',v);cUnlock.classList.toggle('on',!v);render();}
 function setDest(v){destLock=v;dLock.classList.toggle('on',v);dUnlock.classList.toggle('on',!v);render();}
 
+// unlocked ally is discounted TOWARD A RESERVE DRIVER (not the field average),
+// so the swing from locking/unlocking scales with how good the ally actually is.
 function effMate(mate,locked){
   if(!mate) return 0;
   if(locked) return PROJ[mate];
   const lv=+leave.value;
-  return (1-lv)*PROJ[mate]+lv*AVGPROJ;  // unlocked: may be replaced by an average driver
+  return (1-lv)*PROJ[mate]+lv*RESERVE;
 }
 function feeFor(driver,cp){
   const cur=teamOf(driver),dest=teamOf(cp);
@@ -285,22 +304,31 @@ function render(){
     <div class="step"><span class="k">80% SLF cap</span><span class="v">$${R.cap.toFixed(0)}</span></div>
     <div class="step" style="border:none;"><span class="k" style="font-size:15px;color:#fff;">VETO FEE</span><span class="v" style="font-size:18px;">$${R.fee.toFixed(2)}</span></div>`;
 
+  // ---- This driver -> EVERY possible swap (all 8 counterparties) ----
   let dr="",fees=[];
-  Object.keys(teamPts).filter(t=>t!==teamOf(driver)).forEach(dest=>{
-    const cpd=roster[dest][0]; const R2=feeFor(driver,cpd); fees.push(R2.fee);
-    dr+=`<tr><td><span style="color:${teamColor[dest]};font-weight:900;">${dest}</span> <span style="font-size:9px;color:#777;">swap ${cpd}</span></td>
+  const cands=Object.keys(SLF)
+    .filter(n=>teamOf(n)!==teamOf(driver))
+    .map(n=>({n, R:feeFor(driver,n)}))
+    .sort((a,b)=> (teamPts[b.R.dest]-teamPts[a.R.dest]) || (b.R.fee-a.R.fee));
+  let lastTeam=null;
+  cands.forEach(({n,R:R2})=>{
+    fees.push(R2.fee);
+    const teamStart = R2.dest!==lastTeam;
+    lastTeam=R2.dest;
+    dr+=`<tr${teamStart?' class="teamgap"':''}><td><span style="color:${teamColor[R2.dest]};font-weight:900;">${R2.dest}</span> <span style="font-size:10px;color:#aaa;">swap ${n}</span></td>
       <td class="mono">${R2.seat.toFixed(2)}</td>
-      <td>${R2.destMate||'—'}</td>
+      <td>${R2.destMate||'—'} <span style="font-size:9px;color:#777;">${R2.destMate?PROJ[R2.destMate].toFixed(0):''}</span></td>
       <td class="mono" style="color:${R2.mateEff<=0?'#3fe0a0':'#ff6b6b'};">${R2.mateEff>=0?'+':''}${R2.mateEff.toFixed(2)}</td>
       <td class="mono" style="color:#ffd700;font-size:15px;">$${R2.fee.toFixed(0)}</td></tr>`;});
   document.getElementById('destrows').innerHTML=dr;
   const mn=Math.min(...fees),mx=Math.max(...fees);
   document.getElementById('summary').innerHTML=`
-    <div class="stat"><div class="n">$${mx.toFixed(0)}</div><div class="l">Worst-seat fee</div></div>
-    <div class="stat"><div class="n">$${mn.toFixed(0)}</div><div class="l">Best-seat fee</div></div>
-    <div class="stat"><div class="n">$${(mx-mn).toFixed(0)}</div><div class="l">Destination spread</div></div>
+    <div class="stat"><div class="n">$${mx.toFixed(0)}</div><div class="l">Priciest swap</div></div>
+    <div class="stat"><div class="n">$${mn.toFixed(0)}</div><div class="l">Cheapest swap</div></div>
+    <div class="stat"><div class="n">$${(mx-mn).toFixed(0)}</div><div class="l">Swap spread</div></div>
     <div class="stat"><div class="n">$${R.val.toFixed(0)}</div><div class="l">Valuation</div></div>`;
 
+  // whole grid -> chosen destination
   const destTeam=teamOf(cp); let rows="";
   Object.keys(SLF).forEach(n=>{
     if(teamOf(n)===destTeam)return;
