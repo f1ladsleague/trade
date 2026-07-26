@@ -122,7 +122,8 @@
       <div class="panel">
         <h2>🔍 Selected Veto Breakdown</h2>
         <div class="formula-tag">
-          SeatGap = ((curPts − destPts) / spread) ^ (1/sens)<br>
+          TeamStrength = banked championship pts + projected remaining pts of that team's <i>current</i> roster<br>
+          SeatGap = ((curStrength − destStrength) / strengthSpread) ^ (1/sens)<br>
           MateEffect = −mateInfluence × (effDestAlly − effCurAlly) / topProj &nbsp;<span style="color:#777;">(unlocked ally discounted toward a reserve driver)</span><br>
           Fee = clamp( floor , Valuation × (SeatGap + MateEffect) , 80% × real SLF )
         </div>
@@ -165,10 +166,11 @@
         </div>
         <div class="ing">
           <h3>2 · The Seat Downgrade</h3>
-          <p>How far the destination team sits <b>below your current team</b> on championship points:</p>
+          <p>How far the destination team sits <b>below your current team</b> — measured on <b>banked points plus each team's projected remaining points</b>, so it reflects the drivers actually in those cars right now:</p>
           <ul>
             <li>Similar or better team → cheap veto (you'd want to go).</li>
             <li>Much weaker team → expensive veto (you're dodging a disaster).</li>
+            <li>If a team is gutted by an earlier trade, leaving it becomes cheaper in later rounds.</li>
           </ul>
         </div>
         <div class="ing">
@@ -211,7 +213,6 @@ let roster={"Ferrari":["Mapa","Shiyan"],"Aston Martin":["Nuwie G","Shahan"],"McL
 const FEAT={1:30,2:22,3:16,4:12,5:10,6:8,7:6,8:4,9:2,10:1};
 const SPR={1:15,2:12,3:9,4:7,5:6,6:5,7:4,8:3,9:2,10:1};
 const F_LEFT=6, S_LEFT=8;
-const SPREAD=Math.max(...Object.values(teamPts))-Math.min(...Object.values(teamPts));
 const CAP_PCT=0.80;
 
 // ---- projected remaining points: INTERPOLATED from avg finishing position ----
@@ -234,6 +235,21 @@ function expPts(avg,table){
 const PROJ={}; Object.keys(AVGPOS).forEach(d=>PROJ[d]=F_LEFT*expPts(AVGPOS[d],FEAT)+S_LEFT*expPts(AVGPOS[d],SPR));
 const TOPPROJ=Math.max(...Object.values(PROJ));
 const RESERVE=Math.min(...Object.values(PROJ));   // reserve/backmarker level an unlocked ally may be replaced by
+
+// Team strength = banked championship points + projected remaining points of its CURRENT roster.
+// This updates automatically after every trade, so a gutted team is correctly weaker.
+function teamStrength(t, rost){
+  const r = rost || roster;
+  const line = r[t] || [];
+  let s = teamPts[t] || 0;
+  for(let i=0;i<line.length;i++){ s += (PROJ[line[i]] || 0); }
+  return s;
+}
+function strengthSpread(rost){
+  const vals = Object.keys(teamPts).map(function(t){ return teamStrength(t, rost); });
+  const sp = Math.max.apply(null,vals) - Math.min.apply(null,vals);
+  return sp > 0 ? sp : 1;
+}
 
 // valuation = pool re-shared by performance
 const POOL=Object.values(SLF).reduce((a,b)=>a+b,0);
@@ -261,7 +277,7 @@ function effMate(mate,locked){
 function feeFor(driver,cp){
   const cur=teamOf(driver),dest=teamOf(cp);
   const val=VAL[driver];
-  const seat=Math.pow(Math.max(0,(teamPts[cur]-teamPts[dest])/SPREAD),1/(+sens.value));
+  const seat=Math.pow(Math.max(0,(teamStrength(cur)-teamStrength(dest))/strengthSpread()),1/(+sens.value));
   const curMate=roster[cur].find(x=>x!==driver);
   const destMate=roster[dest].find(x=>x!==cp);
   const effCur=effMate(curMate,curLock);
@@ -298,7 +314,7 @@ function render(){
   document.getElementById('breakdown').innerHTML=`
     <div class="step"><span class="k">Real SLF (max recoverable)</span><span class="v">$${SLF[driver]}</span></div>
     <div class="step"><span class="k">Performance valuation (sizing)</span><span class="v">$${R.val.toFixed(0)}</span></div>
-    <div class="step"><span class="k">${R.cur} ${teamPts[R.cur]}pts → ${R.dest} ${teamPts[R.dest]}pts</span><span class="v">seat ${R.seat.toFixed(2)}</span></div>
+    <div class="step"><span class="k">${R.cur} proj ${teamStrength(R.cur).toFixed(0)} → ${R.dest} proj ${teamStrength(R.dest).toFixed(0)}</span><span class="v">seat ${R.seat.toFixed(2)}</span></div>
     <div class="step"><span class="k">Ally: ${R.destMate||'—'}(${R.effDest.toFixed(0)}) vs ${R.curMate||'—'}(${R.effCur.toFixed(0)})</span><span class="v">${R.mateEff>=0?'+':''}${R.mateEff.toFixed(2)}</span></div>
     <div class="step"><span class="k">Effective factor</span><span class="v">${R.factor.toFixed(2)}</span></div>
     <div class="step"><span class="k">80% SLF cap</span><span class="v">$${R.cap.toFixed(0)}</span></div>
