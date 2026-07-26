@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F1 Lads League | Trade Window LIVE</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/f1ladsleague/sidebetting/6f14ca658f9c288fd8ca8a79df5c658c97c8ac92/favicon.png">
+/css2?family=Titillium+Web:wght@400;600;700;900&display=swap" rel="stylesheet">
+/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--dark:#0E0E14;--card:#1A1A22;--card2:#22222C;--red:#E10600;--gold:#FFD700;--mute:#8A909B;--green:#3FE0A0;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Titillium Web',sans-serif;background:var(--dark);color:#fff;padding:18px;
+       background-image:radial-gradient(circle at 50% 0%,rgba(225,6,0,.10),transparent 60%);min-height:100vh;}
+  .wrap{max-width:1280px;margin:0 auto;}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand img{height:52px;}
+  .brand h1{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+  .brand span{display:block;font-size:11px;color:var(--mute);letter-spacing:3px;font-weight:600;}
+  .live{display:flex;align-items:center;gap:8px;background:rgba(225,6,0,.15);border:1px solid var(--red);
+        padding:7px 15px;border-radius:30px;font-weight:900;font-size:12px;letter-spacing:2px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite;}
+  @keyframes blink{50%{opacity:.25;}}
+  .phase{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid #2E2E3A;
+         border-radius:14px;padding:18px 24px;margin-bottom:16px;display:flex;
+         align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .phase .lbl{font-size:11px;color:var(--mute);letter-spacing:3px;font-weight:700;}
+  .phase .nm{font-size:30px;font-weight:900;text-transform:uppercase;color:var(--gold);line-height:1.1;}
+  .phase .rd{font-size:12px;color:var(--mute);margin-top:3px;}
+  .clock{font-family:'Courier New',monospace;font-size:52px;font-weight:900;letter-spacing:3px;
+         color:#fff;text-shadow:0 0 22px rgba(225,6,0,.55);}
+  .clock.urgent{color:#FF4444;animation:blink .8s infinite;}
+  .prog{height:5px;background:#2A2A34;border-radius:3px;overflow:hidden;width:100%;margin-top:12px;}
+  .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--gold));
+          border-radius:3px;transition:width .3s linear;}
+  .stage{background:var(--card);border:1px solid #2E2E3A;border-radius:14px;
+         padding:26px;margin-bottom:16px;min-height:230px;position:relative;overflow:hidden;}
+  .stage::before{content:"";position:absolute;left:0;top:0;width:100%;height:4px;
+                 background:linear-gradient(90deg,var(--red),var(--gold),var(--red));}
+  .stage-h{font-size:12px;color:var(--red);letter-spacing:3px;font-weight:900;margin-bottom:16px;}
+  .center{text-align:center;padding:26px 10px;}
+  .center .ico{font-size:52px;display:block;margin-bottom:14px;}
+  .center .msg{font-size:17px;color:#CFD3DA;line-height:1.5;}
+  .center .sub{font-size:13px;color:var(--mute);margin-top:9px;font-style:italic;}
+  .env-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px;}
+  .env{background:var(--card2);border:2px dashed #3A3A46;border-radius:11px;padding:17px;text-align:center;transition:.3s;}
+  .env.in{border-style:solid;border-color:var(--green);background:rgba(63,224,160,.09);}
+  .env .e{font-size:30px;}
+  .env .t{font-weight:900;font-size:14px;margin-top:7px;text-transform:uppercase;}
+  .env .s{font-size:11px;color:var(--mute);margin-top:3px;letter-spacing:1px;}
+  .env.in .s{color:var(--green);font-weight:700;}
+  .hero{display:flex;align-items:center;gap:26px;flex-wrap:wrap;}
+  .hero .pic{width:130px;height:130px;border-radius:50%;object-fit:cover;object-position:center top;
+             border:4px solid var(--gold);background:#000;box-shadow:0 0 34px rgba(255,215,0,.3);}
+  .hero .info{flex:1;min-width:220px;}
+  .hero .nm{font-size:38px;font-weight:900;text-transform:uppercase;line-height:1;}
+  .hero .tm{font-size:15px;color:var(--mute);margin-top:7px;display:flex;align-items:center;gap:8px;}
+  .hero .tm img{height:19px;}
+  .hero .tag{display:inline-block;background:var(--red);padding:5px 13px;border-radius:5px;
+             font-size:11px;font-weight:900;letter-spacing:2px;margin-top:11px;}
+  .bid{display:flex;align-items:center;justify-content:space-between;background:var(--card2);
+       border-radius:10px;padding:14px 18px;margin-bottom:10px;border-left:5px solid var(--tc,#444);}
+  .bid.top{background:rgba(255,215,0,.10);border-left-color:var(--gold);}
+  .bid .who{font-weight:900;font-size:16px;text-transform:uppercase;}
+  .bid .pkg{font-size:12px;color:var(--mute);margin-top:2px;}
+  .bid .amt{font-family:'Courier New',monospace;font-size:23px;font-weight:900;color:var(--green);}
+  .bid.top .amt{color:var(--gold);}
+  .crown{font-size:16px;margin-right:6px;}
+  .cols{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;}
+  @media(max-width:900px){.cols{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid #2E2E3A;border-radius:14px;padding:20px;}
+  .panel h2{font-size:12px;letter-spacing:3px;color:var(--mute);font-weight:900;
+            margin-bottom:15px;padding-bottom:9px;border-bottom:1px solid #2E2E3A;}
+  .team{background:var(--card2);border-radius:11px;padding:13px;margin-bottom:11px;border-left:5px solid var(--tc);}
+  .team .hd{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+  .team .hd img{height:21px;}
+  .team .hd .n{font-weight:900;font-size:14px;text-transform:uppercase;color:var(--tc);flex:1;}
+  .team .hd .p{font-family:'Courier New',monospace;font-size:13px;color:var(--mute);}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .drv{display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.28);border-radius:8px;padding:8px;position:relative;}
+  .drv img{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:center top;border:2px solid #3A3A46;}
+  .drv .dn{font-size:13px;font-weight:700;}
+  .drv .dt{font-size:9px;color:var(--mute);letter-spacing:1px;}
+  .drv.lock{opacity:.45;}
+  .drv.lock::after{content:"LOCKED";position:absolute;top:5px;right:6px;background:var(--red);
+                   font-size:7px;font-weight:900;padding:2px 5px;border-radius:6px;letter-spacing:.5px;}
+  .drv.spot{box-shadow:0 0 0 2px var(--gold);background:rgba(255,215,0,.10);}
+  .cap{display:flex;align-items:center;gap:11px;margin-bottom:9px;}
+  .cap .n{font-size:12px;font-weight:700;width:88px;text-transform:uppercase;color:var(--tc);}
+  .cap .track{flex:1;height:19px;background:#14141B;border-radius:5px;overflow:hidden;}
+  .cap .track i{display:block;height:100%;background:var(--tc);border-radius:5px;transition:width .4s;}
+  .cap .v{font-family:'Courier New',monospace;font-size:12px;font-weight:900;width:74px;text-align:right;}
+  .log{background:var(--card2);border-radius:9px;padding:11px 14px;margin-bottom:9px;
+       border-left:4px solid var(--red);font-size:13px;line-height:1.45;}
+  .log .r{font-size:10px;color:var(--mute);margin-top:3px;letter-spacing:1px;}
+  .log.veto{border-left-color:var(--gold);}
+  .log.def{border-left-color:var(--green);}
+  .empty{color:var(--mute);font-style:italic;font-size:13px;text-align:center;padding:16px;}
+  .foot{text-align:center;color:var(--mute);font-size:11px;margin-top:20px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <a href="https://f1lads.com">814abd6cb31f36f99696b471262536d272/Logo.png" alt="F1 Lads"></a>
+      <div><h1>Mid-Season Trade Window</h1><span>SPECTATOR FEED</span></div>
+    </div>
+    <div class="live"><span class="dot"></span> LIVE</div>
+  </div>
+
+  <div class="phase">
+    <div>
+      <div class="lbl">CURRENT PHASE</div>
+      <div class="nm" id="ph">Connecting…</div>
+      <div class="rd" id="rd">&nbsp;</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="lbl">TIME REMAINING</div>
+      <div class="clock" id="clk">--:--</div>
+    </div>
+    <div class="prog"><i id="bar" style="width:0%"></i></div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-h" id="sh">STANDBY</div>
+    <div id="stage"></div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>CURRENT GRID</h2>
+      <div id="grid"></div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:16px;">
+        <h2>BUDGET CAPS</h2>
+        <div id="caps"></div>
+      </div>
+      <div class="panel">
+        <h2>COMPLETED DEALS</h2>
+        <div id="hist"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">F1 LADS LEAGUE · READ-ONLY SPECTATOR VIEW · SEALED BIDS STAY HIDDEN UNTIL SETTLEMENT</div>
+</div>
+
+<script>
+const SUPABASE_URL='https://ofvdablhzzvjmllfkehw.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mdmRhYmxoenp2am1sbGZrZWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MjQ0MDksImV4cCI6MjA5OTEwMDQwOX0.tkPKHrxhSmSjunu4LRSO3q7KXunFAznJAkMC8kEnz-Y';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+const SHEET_ID="2PACX-1vTZKLukYpw5VzMfRbfXh80lj1B0gbUiVx_CoinOMVb-b2iFEMiWg_nW3KcMp88qKL3UfctvzYgEN_Lg";
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/"+SHEET_ID+"/pub?gid=1589744882&single=true&output=csv";
+const PHOTO_BASE=SUPABASE_URL+"/storage/v1/object/public/driver-photos";
+const dCode={"Shiyan":"SHI","Mapa":"MAP","Rodda":"ROD","Nuwie G":"NUW","Kalpa":"KAL","Sameera":"SAM","Nippa E":"NIP","Shahan":"SHA","Eranga":"ERA","Sahan":"SAH"};
+const tCode={"McLaren":"MCL","Red Bull":"RB","Ferrari":"FER","Mercedes":"MER","Aston Martin":"AM"};
+const logos={
+ "Aston Martin":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/AM.png",
+ "Ferrari":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/FER.png",
+ "McLaren":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MCL.png",
+ "Mercedes":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/MER.png",
+ "Red Bull":"https://raw.githubusercontent.com/f1ladsleague/sidebetting/3bea2638655c2cd16aaf69b2541dd0f535f80c7f/Team_Logos/RB.png"};
+const tiers={"Mapa":"1","Nuwie G":"1","Rodda":"1.5","Sahan":"1.5","Kalpa":"2","Shahan":"2","Sameera":"2","Shiyan":"3","Eranga":"3","Nippa E":"3"};
+
+function col(t){t=(t||"").toLowerCase();
+ if(t.indexOf("mercedes")>=0)return"#00D7B6"; if(t.indexOf("red bull")>=0)return"#4781D7";
+ if(t.indexOf("ferrari")>=0)return"#ED1131"; if(t.indexOf("mclaren")>=0)return"#F47600";
+ if(t.indexOf("aston")>=0)return"#229971"; return"#E10600";}
+function money(n){return "$"+Number(n||0).toFixed(2);}
+function norm(t){return String(t||"").toLowerCase().replace(/racing|f1|team/g,"").replace(/[^a-z]/g,"");}
+function pic(d,t,cls,extra){
+ var dc=dCode[d],tc=tCode[t];
+ var src=(dc&&tc)?(PHOTO_BASE+"/"+dc+"-"+tc+".png"):"";
+ return '<'+'img src="'+src+'" class="'+(cls||'')+'" '+(extra||'')+' alt="'+d+'">';
+}
+function logo(t,cls){var s=logos[t]||"";return '<'+'img src="'+s+'" class="'+(cls||'')+'" alt="'+t+'">';}
+
+let st=null,drv=[],led=[],noms=[],bids=[],trades=[],caps={},tick=null,phaseTotal=120;
+
+async function csv(){
+ try{
+  const r=await fetch(CSV_URL+"&nocache="+Date.now(),{cache:"no-store"});
+  const rows=(await r.text()).replace(/\r/g,'').split('\n').slice(1);
+  rows.forEach(function(line){
+   if(!line.trim())return;
+   const a=line.split(',');
+   if(a[0])caps[norm(a[0])]=parseFloat(String(a[6]||"0").replace(/[^0-9.]/g,""))||0;
+  });
+ }catch(e){console.warn("caps sheet unavailable",e);}
+}
+function liveCap(t){
+ let b=caps[norm(t)]||0;
+ led.forEach(function(l){ if(norm(l.constructor)===norm(t)) b+=Number(l.delta); });
+ return Math.round(b*100)/100;
+}
+async function load(){
+ const r=await Promise.all([
+  sb.from('auction_state').select('*').order('id',{ascending:false}).limit(1),
+  sb.from('auction_drivers').select('*').order('id',{ascending:true}),
+  sb.from('auction_cap_ledger').select('*'),
+  sb.from('auction_nominations').select('*'),
+  sb.from('auction_bids').select('*'),
+  sb.from('auction_trades').select('*')]);
+ st=(r[0].data&&r[0].data[0])||st; drv=r[1].data||drv; led=r[2].data||[];
+ noms=r[3].data||[]; bids=r[4].data||[]; trades=r[5].data||[];
+}
+function teams(){
+ const s={}; drv.forEach(function(d){s[d.original_team]=1;});
+ const k=Object.keys(s); return k.length?k.sort():Object.keys(logos).sort();
+}
+function bidsFor(t){
+ const m={};
+ noms.filter(function(n){return n.round_no===st.round_no&&n.target_driver===t;})
+     .forEach(function(n){m[n.constructor]={c:n.constructor,v:Number(n.cash_bid),o:n.offered_driver};});
+ bids.filter(function(b){return b.round_no===st.round_no&&b.target_driver===t;})
+     .forEach(function(b){m[b.constructor]={c:b.constructor,v:Number(b.cash_bid),o:b.offered_driver};});
+ return Object.keys(m).map(function(k){return m[k];});
+}
+
+function clock(){
+ if(tick)clearInterval(tick);
+ const el=document.getElementById('clk'),bar=document.getElementById('bar');
+ function go(){
+  if(!st||!st.phase_deadline){el.textContent="--:--";el.className="clock";bar.style.width="0%";return;}
+  const diff=new Date(st.phase_deadline).getTime()-Date.now();
+  if(diff<=0){el.textContent="00:00";el.className="clock urgent";bar.style.width="0%";return;}
+  const m=Math.floor(diff/60000),s=Math.floor((diff%60000)/1000);
+  el.textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+  el.className="clock"+(diff<30000?" urgent":"");
+  bar.style.width=Math.max(0,Math.min(100,(diff/(phaseTotal*1000))*100))+"%";
+ }
+ go(); tick=setInterval(go,250);
+}
+
+function stage(){
+ const p=st?st.phase:'idle', sh=document.getElementById('sh'), box=document.getElementById('stage');
+ if(p==='idle'){
+  sh.textContent="STANDBY";
+  box.innerHTML='<div class="center"><span class="ico">\u{1F3C1}</span><div class="msg">Waiting for the next nomination round to open.</div><div class="sub">Constructors are planning their moves…</div></div>';
+  return;
+ }
+ if(p==='complete'){
+  sh.textContent="WINDOW CLOSED";
+  box.innerHTML='<div class="center"><span class="ico">\u{1F3C6}</span><div class="msg">The Mid-Season Trade Window is closed.</div><div class="sub">'+trades.length+' deals completed. Final line-ups locked in below.</div></div>';
+  return;
+ }
+ if(p==='nominate'){
+  sh.textContent="SEALED NOMINATIONS \u00B7 IN PROGRESS";
+  const done={}; noms.filter(function(n){return n.round_no===st.round_no;}).forEach(function(n){done[n.constructor]=1;});
+  let h='<div class="center" style="padding:6px 0 20px;"><div class="msg">Every constructor is secretly nominating one driver to target.</div><div class="sub">Targets and bid amounts stay sealed until the auction opens.</div></div><div class="env-grid">';
+  teams().forEach(function(t){
+   const inn=done[t]?" in":"";
+   h+='<div class="env'+inn+'"><div class="e">'+(done[t]?"\u{1F4E9}":"\u{2709}\u{FE0F}")+'</div><div class="t">'+t+'</div><div class="s">'+(done[t]?"SUBMITTED":"PENDING")+'</div></div>';
+  });
+  box.innerHTML=h+'</div>';
+  return;
+ }
+ const tgt=st.target_driver, row=drv.filter(function(d){return d.driver===tgt;})[0];
+ const tm=row?row.current_team:st.seller_team;
+ const heroHtml='<div class="hero">'+pic(tgt,tm,'pic')+
+   '<div class="info"><div class="nm">'+tgt+'</div>'+
+   '<div class="tm">'+logo(tm,'')+' '+tm+' \u00B7 Tier '+(tiers[tgt]||'?')+'</div>'+
+   '<span class="tag" id="heroTag"></span></div></div>';
+
+ if(p==='bidding'){
+  sh.textContent="AUCTION OPEN \u00B7 SEALED BIDS";
+  const n=bidsFor(tgt).length;
+  box.innerHTML=heroHtml+'<div style="margin-top:20px;text-align:center;"><div class="msg" style="font-size:16px;">'+n+' sealed bid'+(n===1?'':'s')+' received</div><div class="sub">Amounts stay hidden until bidding closes.</div></div>';
+  document.getElementById('heroTag').textContent="UP FOR AUCTION";
+  return;
+ }
+ if(p==='settlement'){
+  sh.textContent="BIDS REVEALED \u00B7 SELLER DECIDING";
+  const list=bidsFor(tgt).sort(function(a,b){return b.v-a.v;});
+  const rofr=liveCap(st.seller_team);
+  let h=heroHtml+'<div style="margin-top:20px;">';
+  if(!list.length){h+='<div class="empty">No bids received.</div>';}
+  else{
+   list.forEach(function(b,i){
+    h+='<div class="bid'+(i===0?' top':'')+'" style="--tc:'+col(b.c)+'"><div><div class="who">'+(i===0?'<span class="crown">\u{1F451}</span>':'')+b.c+'</div><div class="pkg">plus '+b.o+' in the swap</div></div><div class="amt">'+money(b.v)+'</div></div>';
+   });
+   h+='<div class="sub" style="text-align:center;margin-top:12px;">'+st.seller_team+' may match '+money(rofr)+' to keep '+tgt+', or sell to the highest bidder.</div>';
+  }
+  box.innerHTML=h+'</div>';
+  document.getElementById('heroTag').textContent="ON THE BLOCK";
+  return;
+ }
+ if(p==='veto'){
+  sh.textContent="DRIVER DECISION \u00B7 ACCEPT OR VETO";
+  box.innerHTML=heroHtml+
+   '<div style="margin-top:20px;text-align:center;">'+
+   '<div class="msg" style="font-size:19px;">'+st.seller_team+' &nbsp;\u2192&nbsp; <b style="color:'+col(st.winning_team)+'">'+st.winning_team+'</b></div>'+
+   '<div class="sub" style="font-size:14px;">Agreed at <b style="color:var(--gold)">'+money(st.winning_bid)+'</b> plus '+st.winning_swap+'</div>'+
+   '<div style="margin-top:16px;font-size:15px;color:#CFD3DA;">'+tgt+' is deciding whether to accept \u2014 or pay the veto fee to stay put.</div>'+
+   '<div class="sub">No decision before the clock runs out means the trade goes through.</div></div>';
+  document.getElementById('heroTag').textContent="DEAL AGREED";
+  return;
+ }
+}
+
+function grid(){
+ const tgt=st&&(st.phase==='bidding'||st.phase==='settlement'||st.phase==='veto')?st.target_driver:null;
+ let h='';
+ teams().forEach(function(t){
+  const line=drv.filter(function(d){return d.current_team===t;});
+  h+='<div class="team" style="--tc:'+col(t)+'"><div class="hd">'+logo(t,'')+'<span class="n">'+t+'</span><span class="p">'+money(liveCap(t))+'</span></div><div class="duo">';
+  if(!line.length)h+='<div class="empty" style="grid-column:1/-1;">No drivers</div>';
+  line.forEach(function(d){
+   const cls='drv'+(d.locked?' lock':'')+(d.driver===tgt?' spot':'');
+   h+='<div class="'+cls+'">'+pic(d.driver,d.current_team,'')+'<div><div class="dn">'+d.driver+'</div><div class="dt">TIER '+(tiers[d.driver]||'?')+'</div></div></div>';
+  });
+  h+='</div></div>';
+ });
+ document.getElementById('grid').innerHTML=h;
+}
+
+function capsBoard(){
+ const vals=teams().map(liveCap); const mx=Math.max.apply(null,vals.concat([1]));
+ let h='';
+ teams().forEach(function(t){
+  const v=liveCap(t);
+  h+='<div class="cap" style="--tc:'+col(t)+'"><span class="n">'+t+'</span><span class="track"><i style="width:'+Math.max(2,(v/mx)*100)+'%"></i></span><span class="v">'+money(v)+'</span></div>';
+ });
+ document.getElementById('caps').innerHTML=h;
+}
+
+function hist(){
+ const el=document.getElementById('hist');
+ if(!trades.length){el.innerHTML='<div class="empty">No deals completed yet.</div>';return;}
+ let h='';
+ trades.slice().reverse().forEach(function(t){
+  let line='',cls='log';
+  if(t.outcome==='traded'){line='<b>'+t.driver_out+'</b> \u2192 '+t.buyer_team+' for '+money(t.cash_amount)+'<br><span style="color:var(--mute);font-size:11px;">'+t.driver_in+' moves the other way</span>';}
+  else if(t.outcome==='rofr_defended'){cls='log def';line=t.seller_team+' defended <b>'+t.driver_out+'</b><br><span style="color:var(--mute);font-size:11px;">Matched '+money(t.cash_amount)+' to the League</span>';}
+  else if(t.outcome==='vetoed'){cls='log veto';line='<b>'+t.driver_out+'</b> VETOED the move \u{1F6D1}<br><span style="color:var(--mute);font-size:11px;">Stays put and is now locked</span>';}
+  h+='<div class="'+cls+'">'+line+'<div class="r">ROUND '+t.round_no+'</div></div>';
+ });
+ el.innerHTML=h;
+}
+
+function paint(){
+ const p=st?st.phase:'idle';
+ const names={idle:"Awaiting Start",nominate:"Silent Nomination",bidding:"Final Bidding",settlement:"Trade Settlement",veto:"Driver Veto",complete:"Window Closed"};
+ document.getElementById('ph').textContent=names[p]||p;
+ document.getElementById('rd').textContent=st&&st.round_no?("ROUND "+st.round_no):"\u00A0";
+ clock(); stage(); grid(); capsBoard(); hist();
+}
+
+(async function(){
+ await csv(); await load(); paint();
+ sb.channel('spectator')
+  .on('postgres_changes',{event:'*',schema:'public',table:'auction_state'},refresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'auction_nominations'},refresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'auction_bids'},refresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'auction_drivers'},refresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'auction_cap_ledger'},refresh)
+  .on('postgres_changes',{event:'*',schema:'public',table:'auction_trades'},refresh)
+  .subscribe();
+ setInterval(refresh,5000);
+})();
+async function refresh(){ await load(); paint(); }
+</script>
+</body>
+</html>
