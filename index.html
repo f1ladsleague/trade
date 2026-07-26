@@ -314,6 +314,27 @@
     var VF_VAL = {};
     Object.keys(VF_DSS).forEach(function(d){ VF_VAL[d] = VF_POOL*VF_DSS[d]/VF_DSUM; });
 
+    // Team strength = banked championship pts + projected remaining pts of its CURRENT roster
+    // (read live from liveDrivers, so a gutted team is correctly weaker in later rounds).
+    function vfTeamStrength(team){
+        var s = VF_TEAMPTS[team];
+        if(s === undefined) s = 0;
+        for(var i=0;i<liveDrivers.length;i++){
+            if(liveDrivers[i].current_team === team){
+                var p = VF_PROJ[liveDrivers[i].driver];
+                if(p) s += p;
+            }
+        }
+        return s;
+    }
+    function vfStrengthSpread(){
+        var keys = Object.keys(VF_TEAMPTS);
+        var vals = [];
+        for(var i=0;i<keys.length;i++){ vals.push(vfTeamStrength(keys[i])); }
+        var sp = Math.max.apply(null, vals) - Math.min.apply(null, vals);
+        if(sp <= 0) return 1;
+        return sp;
+    }
     function vfEffMate(mate, locked){
         if(!mate || VF_PROJ[mate] === undefined) return 0;
         if(locked) return VF_PROJ[mate];
@@ -324,9 +345,7 @@
             var tc = tierConfig[driver];
             return { fee: tc ? tc.veto : 0, fallback: true };
         }
-        var pts = Object.values(VF_TEAMPTS);
-        var SPREAD = Math.max.apply(null, pts) - Math.min.apply(null, pts);
-        var seat = Math.pow(Math.max(0, (VF_TEAMPTS[curTeam] - VF_TEAMPTS[destTeam]) / SPREAD), 1 / VF_SENS);
+        var seat = Math.pow(Math.max(0, (vfTeamStrength(curTeam) - vfTeamStrength(destTeam)) / vfStrengthSpread()), 1 / VF_SENS);
         var curAllyRow = liveDrivers.find(function(d){ return d.current_team === curTeam && d.driver !== driver; });
         var destAllyRow = liveDrivers.find(function(d){ return d.current_team === destTeam && d.driver !== counterparty; });
         var curAlly = curAllyRow ? curAllyRow.driver : null;
@@ -525,9 +544,9 @@
             if(diff<=0){
                 el.innerText="00:00";
                 el.classList.add('urgent');
-                // Only the admin drives the engine, and ONLY after the grace window,
-                // so genuine last-second submissions are still counted.
-                if(role==='Admin' && diff <= -GRACE_MS) autoAdvance();
+                // ANY logged-in client drives the engine once the grace window has passed.
+                // Admin acts first; other clients back off a random amount so they don't collide.
+                if(me && diff <= -(GRACE_MS + advanceDelayMs())) autoAdvance(false);
                 return;
             }
             const m=Math.floor(diff/60000), s=Math.floor((diff%60000)/1000);
@@ -762,7 +781,7 @@
                 : `<div class="admin-warn">All drivers processed — the trade window is complete.</div>`;
         } else {
             html+=`<div class="admin-warn">Round in progress — auto-advancing on timers. Use override only if stuck.</div>
-                   <button class="btn-primary" style="background:#555;" onclick="autoAdvance()">⏭ Force Advance Phase</button>
+                   <button class="btn-primary" style="background:#555;" onclick="autoAdvance(true)">⏭ Force Advance Phase</button>
                    <button class="btn-primary" style="background:#ff4444;margin-top:10px;" onclick="adminCancelRound()">✖ Cancel / Reset This Round</button>`;
         }
         html+=`<div style="margin-top:18px;padding-top:16px;border-top:1px dashed #444;">
@@ -994,11 +1013,25 @@
         }
     };
 
+    var _jitter = 600 + Math.floor(Math.random()*2000);
+    function advanceDelayMs(){ if(role === 'Admin') return 0; return _jitter; }
+
     let _advancing=false;
-    async function autoAdvance(){
+    async function autoAdvance(force){
         if(_advancing) return; _advancing=true;
         try{
+            const beforePhase = auctionState ? auctionState.phase : null;
+            const beforeDeadline = auctionState ? auctionState.phase_deadline : null;
             await refreshAll();
+            // If another client already advanced this phase, stand down.
+            if(auctionState && (auctionState.phase !== beforePhase || auctionState.phase_deadline !== beforeDeadline)){
+                render(); return;
+            }
+            // Unless manually forced, only advance once the deadline has genuinely passed.
+            if(!force && auctionState && auctionState.phase_deadline &&
+               serverNow() < new Date(auctionState.phase_deadline).getTime() + GRACE_MS){
+                return;
+            }
             const p=auctionState.phase;
 
             if(p==='nominate'){
